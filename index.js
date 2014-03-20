@@ -118,9 +118,9 @@ Console.prototype._setServiceStatus = function(status, name, node, cb){
         cb = _defaultCallback;
     }
 
-    if(status !== 'start' && status !== 'stop'){
+    if(status !== 'start' && status !== 'stop' && status !== 'kill'){
         // this is programming error, bail out immediately
-        throw new TypeError('"status" is expected to be "start" or "stop". Got "' + status + '"');
+        throw new TypeError('"status" is expected to be "start", "stop" or "kill". Got "' + status + '"');
     }
 
     function doSetServiceStatus( newStatus, callback){
@@ -128,8 +128,10 @@ Console.prototype._setServiceStatus = function(status, name, node, cb){
         var form = null;
         if(newStatus === 'start'){
             form = { "action_START": "Start" };
-        } else {
+        } else if(newStatus === 'stop'){
             form = { "action_STOP": "Stop" };
+        } else if(newStatus === 'kill'){
+            form = { "action_KILL": "Kill" };
         }
 
         request.post( self._composeRequestObject('/BridgeInstanceConfiguration', form, { "node": node, "instance": name}),
@@ -193,6 +195,10 @@ Console.prototype.startService = function( name, node, cb) {
 
 Console.prototype.stopService = function( name, node, cb) {
     this._setServiceStatus("stop", name, node, cb);
+}
+
+Console.prototype.killService = function( name, node, cb) {
+    this._setServiceStatus("kill", name, node, cb);
 }
 
 module.exports = Console;
