@@ -1,0 +1,19 @@
+{
+  "name": "e2econsole",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "request": "2.34.x",
+    "xml2js-expat": "~0.2.2"
+  },
+  "author": {
+    "name": "Jakub Zakrzewski",
+    "email": "jzakrzewski@e2e.ch"
+  },
+  "description": "library to interact with E2E Console",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git://nas1.e2e.ch/console-cli.git"
+  }
+}
