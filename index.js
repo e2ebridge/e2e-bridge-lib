@@ -8,10 +8,13 @@
 var request = require('request');
 var util = require('util');
 var xml2js = require('xml2js-expat');
+var fs = require('fs');
+var stream = require('stream');
 
 //fixme: When CON-879 is done
 var ERROR_UNAUTHENTICATED = "The user is not authenticated";
 var CONSOLE_BASE = '/admin/Console';
+var FIRMWARE_DEPLOY_ENDPOINT = '/Deploy';
 
 
 function _defaultCallback(err) {
@@ -59,9 +62,8 @@ Console.prototype._composeRequestObject = function(endpoint, form, getParams) {
         uri += '?' + getString;
     }
 
-    return {
+    var ret = {
         "url": uri,
-        "form": form,
         "headers": {
             "X-Bridge": "return-xml"
         },
@@ -69,6 +71,12 @@ Console.prototype._composeRequestObject = function(endpoint, form, getParams) {
         "jar": self._coockieJar,
         "followAllRedirects": true
     }
+
+    if(form){
+        ret.form = form;
+    }
+
+    return ret;
 }
 
 Console.prototype._ensureLogin = function(cb) {
@@ -87,7 +95,6 @@ Console.prototype._ensureLogin = function(cb) {
         if (!error && response.statusCode == 200) {
             var parser = new xml2js.Parser(function(result, err) {
                 if (!err) {
-                    console.log('Log In: ', util.inspect(result));
                     if(result.Status === 'OK'){
                         self._loggedIn = true;
                         cb();
@@ -135,7 +142,6 @@ Console.prototype._setServiceStatus = function( newStatus, serviceType, node, na
             if (!error && response.statusCode == 200) {
                 var parser = new xml2js.Parser(function(result, err) {
                     if (!err) {
-                        console.log(newStatus + ' service ' + name + ': ', util.inspect(result));
                         if(result.Status === 'OK'){
                             callback();
                         } else {
@@ -169,8 +175,6 @@ Console.prototype.setServiceStatus = function(status, name, type, node, cb){
         // this is programming error, bail out immediately
         throw new TypeError('"status" is expected to be "start", "stop" or "kill". Got "' + status + '"');
     }
-
-
 
     self._ensureLogin(function(err){
         if(err){
@@ -221,6 +225,117 @@ Console.prototype.startNodeService = function( name, node, cb) {
 
 Console.prototype.stopNodeService = function( name, node, cb) {
     this.setServiceStatus("stop", name, 'node', node, cb);
+}
+
+Console.prototype.deployService = function( file, options, cb) {
+
+    var self = this;
+
+    if( typeof options === 'function'){
+        cb = options;
+        options = {};
+    }
+
+    function doDeployment( filename, data){
+        self._ensureLogin(function(err){
+            if(err){
+                return cb(err);
+            }
+            self._deployService(filename, data, options, function(error){
+                if(error && error.errorType === 'Console error' && error.error.Message === ERROR_UNAUTHENTICATED) {
+                    // this may happen after long period of inactivity. We have to re-login
+                    self._loggedIn = false;
+                    self._ensureLogin(function(er){
+                        if(er){
+                            return cb(er);
+                        }
+
+                        self._deployService(filename, data, options, function(e){
+                            if(e){
+                                return cb(e);
+                            };
+
+                            return cb();
+                        });
+                    });
+                } else if(error) {
+                    return cb(error);
+                } else {
+                    return cb();
+                }
+            });
+        });
+    }
+
+    if( Buffer.isBuffer(file)){
+        doDeployment('repository.zip', file);
+    } else {
+        fs.readFile(file, function(err, data){
+            if( err){
+                return cb({ errorType: "Filesystem error", error: err});
+            }
+
+            doDeployment(file, data);
+        });
+    }
+}
+
+/**
+ * Does the real deployment work.
+ *
+ * @remarks: This function is a bit hackish, but it's the only way I could get console into accepting file upload.
+ * In ideal world we would stream it, but then Transfer-Encoding: chunked made console unhappy. Also different way of
+ * creating form is here for a reason - in this version we'll get proper multipart/form-data so the console is happy.
+ *
+ * @param {string} filename The name of the file we're uploading
+ * @param {Buffer} data     Content of the file.
+ * @param {Object} options  Options regarding startup, overwriting and settings overwriting.
+ * @param {function} cb     Call it after done.
+ * @private
+ */
+Console.prototype._deployService = function(filename, data, options, cb) {
+
+    var self = this;
+
+    if( !Buffer.isBuffer( data)){
+        throw new TypeError('Data is expected to be a Buffer, "' + (typeof data) + '" given');
+    }
+
+    var postOptions = self._composeRequestObject(FIRMWARE_DEPLOY_ENDPOINT);
+    var requestForm = request.post( postOptions, function(error, response, body) {
+        if (!error && response.statusCode == 200) {
+            var parser = new xml2js.Parser(function(result, err) {
+                if (!err) {
+                    if(result.Status === 'OK'){
+                        cb();
+                    } else {
+                        cb({ errorType: "Console error", error: result});
+                    }
+                }
+                else {
+                    cb({ errorType: "SAX error", error: err});
+                }
+            });
+            parser.parseBuffer(body, true);
+        } else {
+            cb({ errorType: "HTTP error", error: { details: error, response: response}});
+        }
+    }).form();
+
+    requestForm.append("input_repository", data, {
+        filename: filename,
+        contentType: 'application/octet-stream'
+    });
+    if( options.startup){
+        requestForm.append("input_startup", 'true');
+    }
+    if( options.overwrite){
+        requestForm.append("input_overwrite", 'true');
+    }
+    if( options.settings){
+        requestForm.append("input_overwrite_settings", 'true');
+    }
+    requestForm.append("action_UPLOAD", "UPLOAD");
 }
 
 module.exports = Console;
