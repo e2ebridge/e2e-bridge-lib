@@ -207,6 +207,90 @@ Console.prototype.setServiceStatus = function(status, name, type, node, cb){
     });
 }
 
+Console.prototype._removeService = function(serviceType, node, name, callback) {
+
+    var self = this;
+
+    var form = null;
+
+    var endpoint = null;
+    if(serviceType === 'bridge') {
+        endpoint = '/BridgeInstanceDelete';
+        form = { "action_DELETE": "Delete Composite Service"};
+    } else if(serviceType === 'node') {
+        endpoint = '/nodejs/service/Delete';
+        form = { "action_DELETE": "Delete Node.js Service"};
+    } else {
+        // this is programming error, bail out immediately
+        throw new TypeError('"serviceType" is expected to be "node" or "bridge". Got "' + serviceType + '"');
+    }
+
+    request.post( self._composeRequestObject(endpoint, form, { "node": node, "instance": name}),
+        function(error, response, body) {
+            console.log(endpoint, node, name, util.inspect(body));
+            if (!error && response.statusCode == 200) {
+                var parser = new xml2js.Parser(function(result, err) {
+                    if (!err) {
+                        if(result.Status === 'OK'){
+                            callback();
+                        } else {
+                            callback({ errorType: "Console error", error: result});
+                        }
+                    }
+                    else {
+                        console.warn(err);
+                        callback({ errorType: "SAX error", error: err});
+                    }
+                });
+                parser.parseBuffer(body, true);
+            } else {
+                callback({ errorType: "HTTP error", error: { details: error, response: response}});
+            }
+        });
+}
+
+Console.prototype.removeService = function(name, type, node, cb){
+    var self = this;
+
+    if(!cb) {
+        cb = node;
+        node = self._host;
+    }
+    if(!cb) {
+        cb = _defaultCallback;
+    }
+
+    self._ensureLogin(function(err){
+        if(err){
+            return cb(err);
+        }
+
+        self._removeService(type, node, name, function(error){
+            if(error && error.errorType === 'Console error' && error.error.Message === ERROR_UNAUTHENTICATED) {
+                // this may happen after long period of inactivity. We have to re-login
+                self._loggedIn = false;
+                self._ensureLogin(function(er){
+                    if(er){
+                        return cb(er);
+                    }
+
+                    self._removeService(type, node, name, function(e){
+                        if(e){
+                            return cb(e);
+                        };
+
+                        return cb();
+                    });
+                });
+            } else if(error) {
+                return cb(error);
+            } else {
+                return cb();
+            }
+        });
+    });
+}
+
 Console.prototype.startBridgeService = function( name, node, cb) {
     this.setServiceStatus("start", name, 'bridge', node, cb);
 }
@@ -219,12 +303,20 @@ Console.prototype.killBridgeService = function( name, node, cb) {
     this.setServiceStatus("kill", name, 'bridge', node, cb);
 }
 
+Console.prototype.removeBridgeService = function( name, node, cb) {
+    this.removeService(name, 'bridge', node, cb);
+}
+
 Console.prototype.startNodeService = function( name, node, cb) {
     this.setServiceStatus("start", name, 'node', node, cb);
 }
 
 Console.prototype.stopNodeService = function( name, node, cb) {
     this.setServiceStatus("stop", name, 'node', node, cb);
+}
+
+Console.prototype.removeNodeService = function( name, node, cb) {
+    this.removeService(name, 'node', node, cb);
 }
 
 Console.prototype.deployService = function( file, options, cb) {
