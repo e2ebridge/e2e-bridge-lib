@@ -23,6 +23,53 @@ function _defaultCallback(err) {
     }
 }
 
+function _executeRequest( paramObject, form, callback){
+
+    if(!form.$isUpload) {
+        paramObject.form = form;
+    }
+
+    var requestObject = request.post( paramObject,
+        function(error, response, body) {
+            console.log(error, response, body);
+            if (!error && response.statusCode == 200) {
+                var parser = new xml2js.Parser(function(result, err) {
+                    if (!err) {
+                        if(result.Status === 'OK'){
+                            callback();
+                        } else {
+                            callback({ errorType: "Console error", error: result});
+                        }
+                    }
+                    else {
+                        callback({ errorType: "SAX error", error: err});
+                    }
+                });
+                parser.parseBuffer(body, true);
+            } else {
+                callback({ errorType: "HTTP error", error: { details: error, response: response}});
+            }
+        });
+
+    if(form.$isUpload){
+        var requestForm = requestObject.form();
+
+        Object.keys(form).forEach(function(key){
+            if(key.substr(0,1) === '$'){
+                return;
+            }
+
+            if( form[key].fieldOptions ){
+                requestForm.append(key, form[key].value, form[key].fieldOptions);
+            } else {
+                requestForm.append(key, form[key]);
+            }
+        })
+    }
+
+
+}
+
 function Console(user, password, host, port) {
     this._host = host || 'localhost';
     this._port = port || 8080;
@@ -46,7 +93,7 @@ Console.prototype.login = function( user, password, cb) {
 
 }
 
-Console.prototype._composeRequestObject = function(endpoint, form, getParams) {
+Console.prototype._composeRequestObject = function(endpoint, getParams) {
 
     var self = this;
 
@@ -72,10 +119,6 @@ Console.prototype._composeRequestObject = function(endpoint, form, getParams) {
         "followAllRedirects": true
     }
 
-    if(form){
-        ret.form = form;
-    }
-
     return ret;
 }
 
@@ -87,31 +130,11 @@ Console.prototype._ensureLogin = function(cb) {
         return cb();
     }
 
-    request.post( self._composeRequestObject( '/Welcome', {
+    _executeRequest(self._composeRequestObject( '/Welcome'), {
             "j_username": self._user,
             "j_password": self._password,
             "action_SUBMIT": "Login"
-        }), function(error, response, body) {
-        if (!error && response.statusCode == 200) {
-            var parser = new xml2js.Parser(function(result, err) {
-                if (!err) {
-                    if(result.Status === 'OK'){
-                        self._loggedIn = true;
-                        cb();
-                    } else {
-                        cb({ errorType: "Console error", error: result});
-                    }
-                }
-                else {
-                    console.warn(err);
-                    cb({ errorType: "SAX error", error: err});
-                }
-            });
-            parser.parseBuffer(body, true);
-        } else {
-            cb({ errorType: "HTTP error", error: { details: error, response: response}});
-        }
-    });
+        }, cb);
 }
 
 Console.prototype._setServiceStatus = function( newStatus, serviceType, node, name, callback) {
@@ -137,27 +160,7 @@ Console.prototype._setServiceStatus = function( newStatus, serviceType, node, na
         throw new TypeError('"serviceType" is expected to be "node" or "bridge". Got "' + serviceType + '"');
     }
 
-    request.post( self._composeRequestObject(endpoint, form, { "node": node, "instance": name}),
-        function(error, response, body) {
-            if (!error && response.statusCode == 200) {
-                var parser = new xml2js.Parser(function(result, err) {
-                    if (!err) {
-                        if(result.Status === 'OK'){
-                            callback();
-                        } else {
-                            callback({ errorType: "Console error", error: result});
-                        }
-                    }
-                    else {
-                        console.warn(err);
-                        callback({ errorType: "SAX error", error: err});
-                    }
-                });
-                parser.parseBuffer(body, true);
-            } else {
-                callback({ errorType: "HTTP error", error: { details: error, response: response}});
-            }
-        });
+    _executeRequest(self._composeRequestObject( endpoint, { "node": node, "instance": name}), form, callback);
 }
 
 Console.prototype.setServiceStatus = function(status, name, type, node, cb){
@@ -225,28 +228,7 @@ Console.prototype._removeService = function(serviceType, node, name, callback) {
         throw new TypeError('"serviceType" is expected to be "node" or "bridge". Got "' + serviceType + '"');
     }
 
-    request.post( self._composeRequestObject(endpoint, form, { "node": node, "instance": name}),
-        function(error, response, body) {
-            console.log(endpoint, node, name, util.inspect(body));
-            if (!error && response.statusCode == 200) {
-                var parser = new xml2js.Parser(function(result, err) {
-                    if (!err) {
-                        if(result.Status === 'OK'){
-                            callback();
-                        } else {
-                            callback({ errorType: "Console error", error: result});
-                        }
-                    }
-                    else {
-                        console.warn(err);
-                        callback({ errorType: "SAX error", error: err});
-                    }
-                });
-                parser.parseBuffer(body, true);
-            } else {
-                callback({ errorType: "HTTP error", error: { details: error, response: response}});
-            }
-        });
+    _executeRequest(self._composeRequestObject( endpoint, { "node": node, "instance": name}), form, callback);
 }
 
 Console.prototype.removeService = function(name, type, node, cb){
@@ -393,41 +375,29 @@ Console.prototype._deployService = function(filename, data, options, cb) {
         throw new TypeError('Data is expected to be a Buffer, "' + (typeof data) + '" given');
     }
 
-    var postOptions = self._composeRequestObject(FIRMWARE_DEPLOY_ENDPOINT);
-    var requestForm = request.post( postOptions, function(error, response, body) {
-        if (!error && response.statusCode == 200) {
-            var parser = new xml2js.Parser(function(result, err) {
-                if (!err) {
-                    if(result.Status === 'OK'){
-                        cb();
-                    } else {
-                        cb({ errorType: "Console error", error: result});
-                    }
-                }
-                else {
-                    cb({ errorType: "SAX error", error: err});
-                }
-            });
-            parser.parseBuffer(body, true);
-        } else {
-            cb({ errorType: "HTTP error", error: { details: error, response: response}});
-        }
-    }).form();
+    var form = {
+        $isUpload: true,
+        input_repository: {
+            value: data,
+            fieldOptions: {
+                filename: filename,
+                contentType: 'application/octet-stream'
+            }
+        },
+        action_UPLOAD: 'UPLOAD'
+    };
 
-    requestForm.append("input_repository", data, {
-        filename: filename,
-        contentType: 'application/octet-stream'
-    });
     if( options.startup){
-        requestForm.append("input_startup", 'true');
+        form.input_startup = 'true';
     }
     if( options.overwrite){
-        requestForm.append("input_overwrite", 'true');
+        form.input_overwrite = 'true';
     }
     if( options.settings){
-        requestForm.append("input_overwrite_settings", 'true');
+        form.input_overwrite_settings = 'true';
     }
-    requestForm.append("action_UPLOAD", "UPLOAD");
+
+    _executeRequest(self._composeRequestObject( FIRMWARE_DEPLOY_ENDPOINT), form, cb);
 }
 
 module.exports = Console;
