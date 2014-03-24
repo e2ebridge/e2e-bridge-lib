@@ -9,7 +9,7 @@ var request = require('request');
 var util = require('util');
 var xml2js = require('xml2js-expat');
 var fs = require('fs');
-var stream = require('stream');
+var path = require('path');
 
 //fixme: When CON-879 is done
 var ERROR_UNAUTHENTICATED = "The user is not authenticated";
@@ -66,9 +66,8 @@ function _executeRequest( paramObject, form, callback){
             }
         })
     }
-
-
 }
+
 
 function Console(user, password, host, port) {
     this._host = host || 'localhost';
@@ -137,6 +136,40 @@ Console.prototype._ensureLogin = function(cb) {
         }, cb);
 }
 
+Console.prototype._logInAndPerform = function( operation, callback){
+    var self = this;
+
+    self._ensureLogin(function(err){
+        if(err){
+            return callback(err);
+        }
+
+        operation( function(error){
+            if(error && error.errorType === 'Console error' && error.error.Message === ERROR_UNAUTHENTICATED) {
+                // this may happen after long period of inactivity. We have to re-login
+                self._loggedIn = false;
+                self._ensureLogin(function(er){
+                    if(er){
+                        return callback(er);
+                    }
+
+                    operation( function(e){
+                        if(e){
+                            return callback(e);
+                        };
+
+                        return callback();
+                    });
+                });
+            } else if(error) {
+                return callback(error);
+            } else {
+                return callback();
+            }
+        });
+    });
+}
+
 Console.prototype._setServiceStatus = function( newStatus, serviceType, node, name, callback) {
 
     var self = this;
@@ -179,35 +212,9 @@ Console.prototype.setServiceStatus = function(status, name, type, node, cb){
         throw new TypeError('"status" is expected to be "start", "stop" or "kill". Got "' + status + '"');
     }
 
-    self._ensureLogin(function(err){
-        if(err){
-            return cb(err);
-        }
-
-        self._setServiceStatus(status, type, node, name, function(error){
-            if(error && error.errorType === 'Console error' && error.error.Message === ERROR_UNAUTHENTICATED) {
-                // this may happen after long period of inactivity. We have to re-login
-                self._loggedIn = false;
-                self._ensureLogin(function(er){
-                    if(er){
-                        return cb(er);
-                    }
-
-                    self._setServiceStatus(status, type, node, name, function(e){
-                        if(e){
-                            return cb(e);
-                        };
-
-                        return cb();
-                    });
-                });
-            } else if(error) {
-                return cb(error);
-            } else {
-                return cb();
-            }
-        });
-    });
+    self._logInAndPerform(function(innerCallback) {
+        self._setServiceStatus(status, type, node, name, innerCallback);
+    }, cb);
 }
 
 Console.prototype._removeService = function(serviceType, node, name, callback) {
@@ -242,35 +249,9 @@ Console.prototype.removeService = function(name, type, node, cb){
         cb = _defaultCallback;
     }
 
-    self._ensureLogin(function(err){
-        if(err){
-            return cb(err);
-        }
-
-        self._removeService(type, node, name, function(error){
-            if(error && error.errorType === 'Console error' && error.error.Message === ERROR_UNAUTHENTICATED) {
-                // this may happen after long period of inactivity. We have to re-login
-                self._loggedIn = false;
-                self._ensureLogin(function(er){
-                    if(er){
-                        return cb(er);
-                    }
-
-                    self._removeService(type, node, name, function(e){
-                        if(e){
-                            return cb(e);
-                        };
-
-                        return cb();
-                    });
-                });
-            } else if(error) {
-                return cb(error);
-            } else {
-                return cb();
-            }
-        });
-    });
+    self._logInAndPerform(function(innerCallback) {
+        self._removeService(type, node, name, innerCallback);
+    }, cb);
 }
 
 Console.prototype.startBridgeService = function( name, node, cb) {
@@ -310,46 +291,19 @@ Console.prototype.deployService = function( file, options, cb) {
         options = {};
     }
 
-    function doDeployment( filename, data){
-        self._ensureLogin(function(err){
-            if(err){
-                return cb(err);
-            }
-            self._deployService(filename, data, options, function(error){
-                if(error && error.errorType === 'Console error' && error.error.Message === ERROR_UNAUTHENTICATED) {
-                    // this may happen after long period of inactivity. We have to re-login
-                    self._loggedIn = false;
-                    self._ensureLogin(function(er){
-                        if(er){
-                            return cb(er);
-                        }
-
-                        self._deployService(filename, data, options, function(e){
-                            if(e){
-                                return cb(e);
-                            };
-
-                            return cb();
-                        });
-                    });
-                } else if(error) {
-                    return cb(error);
-                } else {
-                    return cb();
-                }
-            });
-        });
-    }
-
     if( Buffer.isBuffer(file)){
-        doDeployment('repository.zip', file);
+        self._logInAndPerform(function(innerCallback) {
+            self._deployService('repository.zip', file, options, innerCallback);
+        }, cb);
     } else {
         fs.readFile(file, function(err, data){
             if( err){
                 return cb({ errorType: "Filesystem error", error: err});
             }
 
-            doDeployment(file, data);
+            self._logInAndPerform(function(innerCallback) {
+                self._deployService(path.basename(file), data, options, innerCallback);
+            }, cb);
         });
     }
 }
