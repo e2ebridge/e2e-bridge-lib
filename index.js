@@ -50,7 +50,6 @@ function _executeRequest( paramObject, form, callback){
 
     var requestObject = request.post( paramObject,
         function(error, response, body) {
-            console.log(error, response, body);
             if (!error && response.statusCode == 200) {
                 var parser = new xml2js.Parser(function(result, err) {
                     if (!err) {
