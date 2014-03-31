@@ -1,19 +1,25 @@
 {
   "name": "e2e-console-lib",
-  "version": "0.0.1",
-  "private": true,
+  "version": "0.1.0",
   "dependencies": {
     "request": "2.34.x",
     "xml2js-expat": "~0.2.2"
   },
   "author": {
-    "name": "Jakub Zakrzewski",
-    "email": "jzakrzewski@e2e.ch"
+    "name": "E2E Technologies Ltd",
+    "email": "support@e2ebridge.com"
   },
-  "description": "library to interact with E2E Console",
+  "maintainers": [
+    {
+      "name": "Jakub Zakrzewski",
+      "email": "jzakrzewski@e2e.ch"
+    }
+  ],
+  "license": "MIT",
+  "description": "Library to manage services running on E2E Console",
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git://nas1.e2e.ch/e2e-console-lib.git"
+    "url": "https://github.com/e2ebridge/e2e-console-lib.git"
   }
 }
