@@ -14,12 +14,14 @@ var path = require('path');
 
 //fixme: When CON-879 is done
 /** @const */ var ERROR_UNAUTHENTICATED = "The user is not authenticated";
-/** @const */ var CONSOLE_BASE = '/admin/Console';
+/** @const */ var BRIDGE_BASE = '/admin/Console';
 /** @const */ var FIRMWARE_DEPLOY_ENDPOINT = '/Deploy';
 /** @const */ var LOGIN_ENDPOINT = '/Welcome';
-/** @const */ var BRIDGE_SERVICE_STATUS_ENDPOINT = '/BridgeInstanceConfiguration';
+/** @const */ var XUML_SERVICE_TYPE = 'xUML';
+/** @const */ var NODE_SERVICE_TYPE = 'node';
+/** @const */ var XUML_SERVICE_STATUS_ENDPOINT = '/BridgeInstanceConfiguration';
 /** @const */ var NODE_SERVICE_STATUS_ENDPOINT = '/nodejs/service/Configuration';
-/** @const */ var BRIDGE_SERVICE_REMOVE_ENDPOINT = '/BridgeInstanceDelete';
+/** @const */ var XUML_SERVICE_REMOVE_ENDPOINT = '/BridgeInstanceDelete';
 /** @const */ var NODE_SERVICE_REMOVE_ENDPOINT = '/nodejs/service/Delete';
 /** @const */ var REPOSITORY_CONTENT_TYPE = 'application/octet-stream';
 
@@ -33,7 +35,7 @@ function _defaultCallback(err) {
 /**
  * Executes the request.
  *
- * At this point most of the request is already composed. The only tricky thing is form. E2E Console is very
+ * At this point most of the request is already composed. The only tricky thing is form. E2E Bridge is very
  * sensitive on those forms, encoding and transfer. Therefore we have to use two different ways of attaching form
  * to request as they result in two different way of encoding and transferring the form.
  *
@@ -56,7 +58,7 @@ function _executeRequest( paramObject, form, callback){
                         if(result.Status === 'OK'){
                             callback();
                         } else {
-                            callback({ errorType: "Console error", error: result});
+                            callback({ errorType: "Bridge error", error: result});
                         }
                     }
                     else {
@@ -87,14 +89,14 @@ function _executeRequest( paramObject, form, callback){
 }
 
 /**
- * Console object
+ * Bridge object
  * @param {string} host
  * @param {integer} port
  * @param {?string} user
  * @param {?string} password
  * @constructor
  */
-function Console(host, port, user, password) {
+function Bridge(host, port, user, password) {
     this._host = host || 'localhost';
     this._port = port || 8080;
     this._user = user;
@@ -104,7 +106,7 @@ function Console(host, port, user, password) {
 }
 
 /**
- * Log in to the console instance.
+ * Log in to the bridge instance.
  * Can be used to establish login session. Must be used before other operations if
  * no user/password given to the constructor.
  *
@@ -112,7 +114,7 @@ function Console(host, port, user, password) {
  * @param {string} password
  * @param {function(Object)} callback Called after login. Parameter will be null if login is successful
  */
-Console.prototype.login = function( user, password, callback) {
+Bridge.prototype.login = function( user, password, callback) {
     var self = this;
 
     if( typeof user === 'function') {
@@ -136,12 +138,12 @@ Console.prototype.login = function( user, password, callback) {
 
 /**
  * Prepare settings for request module.
- * @param {!string} endpoint Console endpoint, we intend to call
+ * @param {!string} endpoint Bridge endpoint, we intend to call
  * @param {?Object} getParams URI GET parameters to attach to endpoint (key-value pairs)
  * @returns {Object}
  * @private
  */
-Console.prototype._composeRequestObject = function(endpoint, getParams) {
+Bridge.prototype._composeRequestObject = function(endpoint, getParams) {
 
     var self = this;
 
@@ -152,7 +154,7 @@ Console.prototype._composeRequestObject = function(endpoint, getParams) {
         });
     }
 
-    var uri = 'https://' + self._host + ':' + self._port + CONSOLE_BASE + endpoint;
+    var uri = 'https://' + self._host + ':' + self._port + BRIDGE_BASE + endpoint;
     if( getString != '') {
         uri += '?' + getString;
     }
@@ -162,7 +164,7 @@ Console.prototype._composeRequestObject = function(endpoint, getParams) {
         "headers": {
             "X-Bridge": "return-xml"
         },
-        "strictSSL": false, //because console uses self-signed certificate
+        "strictSSL": false, //because bridge uses self-signed certificate
         "jar": self._coockieJar,
         "followAllRedirects": true
     }
@@ -176,7 +178,7 @@ Console.prototype._composeRequestObject = function(endpoint, getParams) {
  * @param {function(?Object=)} callback Param will be null if everything goes smoothly
  * @private
  */
-Console.prototype._ensureLogin = function(callback) {
+Bridge.prototype._ensureLogin = function(callback) {
 
     var self = this;
 
@@ -202,7 +204,7 @@ Console.prototype._ensureLogin = function(callback) {
  * because we may be forced to call it ourselves.
  * @private
  */
-Console.prototype._logInAndPerform = function( operation, callback){
+Bridge.prototype._logInAndPerform = function( operation, callback){
     var self = this;
 
     self._ensureLogin(function(err){
@@ -211,7 +213,7 @@ Console.prototype._logInAndPerform = function( operation, callback){
         }
 
         operation( function(error){
-            if(error && error.errorType === 'Console error' && error.error.Message === ERROR_UNAUTHENTICATED) {
+            if(error && error.errorType === 'Bridge error' && error.error.Message === ERROR_UNAUTHENTICATED) {
                 // this may happen after long period of inactivity. We have to re-login
                 self._loggedIn = false;
                 self._ensureLogin(function(er){
@@ -238,17 +240,17 @@ Console.prototype._logInAndPerform = function( operation, callback){
 
 /**
  * Change service status.
- * Also start, stop or kill a service. Either node or bridge.
+ * Also start, stop or kill a service. Either node or xUML.
  *
  * @param {!string} change 'start', 'stop' or 'kill'. Note, that 'kill' will not work for node.js services
- * @param {!string} serviceType 'bridge' or 'node'
+ * @param {!string} serviceType 'xUML' or 'node'
  * @param {!string} name Name of the service.
- * @param {(string|function(?Object=))} node Name of the console node. If function type, will be used
+ * @param {(string|function(?Object=))} node Name of the bridge node. If function type, will be used
  * instead of callback parameter. If null or function, will default to host.
  * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
  * @private
  */
-Console.prototype._setServiceStatus = function( change, serviceType, name, node, callback) {
+Bridge.prototype._setServiceStatus = function( change, serviceType, name, node, callback) {
 
     var self = this;
 
@@ -270,13 +272,13 @@ Console.prototype._setServiceStatus = function( change, serviceType, name, node,
     }
 
     var endpoint = '';
-    if(serviceType === 'bridge') {
-        endpoint = BRIDGE_SERVICE_STATUS_ENDPOINT;
-    } else if(serviceType === 'node') {
+    if(serviceType === XUML_SERVICE_TYPE) {
+        endpoint = XUML_SERVICE_STATUS_ENDPOINT;
+    } else if(serviceType === NODE_SERVICE_TYPE) {
         endpoint = NODE_SERVICE_STATUS_ENDPOINT;
     } else {
         // this is programming error, bail out immediately
-        throw new TypeError('"serviceType" is expected to be "node" or "bridge". Got "' + serviceType + '"');
+        throw new TypeError('"serviceType" is expected to be "node" or "xUML". Got "' + serviceType + '"');
     }
 
     _executeRequest(self._composeRequestObject( endpoint, { "node": node, "instance": name}), form, callback);
@@ -286,12 +288,12 @@ Console.prototype._setServiceStatus = function( change, serviceType, name, node,
  * Start, stop or kill services.
  * @param {!string} status 'start', 'stop' or 'kill'. Note, that 'kill' will not work for node.js services
  * @param {!string} name Name of the service.
- * @param {!string} type 'bridge' or 'node'
- * @param {(string|function(?Object=))} node Name of the console node. If function type, will be used
+ * @param {!string} type 'xUML' or 'node'
+ * @param {(string|function(?Object=))} node Name of the bridge node. If function type, will be used
  * instead of callback parameter. If null or function, will default to host.
  * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
  */
-Console.prototype.setServiceStatus = function(status, name, type, node, callback){
+Bridge.prototype.setServiceStatus = function(status, name, type, node, callback){
     var self = this;
 
     if(status !== 'start' && status !== 'stop' && status !== 'kill'){
@@ -305,15 +307,15 @@ Console.prototype.setServiceStatus = function(status, name, type, node, callback
 }
 
 /**
- * Remove service from console
- * @param {!string} serviceType 'bridge' or 'node'
+ * Remove service from bridge
+ * @param {!string} serviceType 'xUML' or 'node'
  * @param {!string} name Name of the service.
- * @param {(string|function(?Object=))} node Name of the console node. If function type, will be used
+ * @param {(string|function(?Object=))} node Name of the bridge node. If function type, will be used
  * instead of callback parameter. If null or function, will default to host.
  * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
  * @private
  */
-Console.prototype._removeService = function(serviceType, name, node, callback) {
+Bridge.prototype._removeService = function(serviceType, name, node, callback) {
 
     var self = this;
 
@@ -328,29 +330,29 @@ Console.prototype._removeService = function(serviceType, name, node, callback) {
     var form = null;
 
     var endpoint = '';
-    if(serviceType === 'bridge') {
-        endpoint = BRIDGE_SERVICE_REMOVE_ENDPOINT;
-        form = { "action_DELETE": "Delete Composite Service"};
-    } else if(serviceType === 'node') {
+    if(serviceType === XUML_SERVICE_TYPE) {
+        endpoint = XUML_SERVICE_REMOVE_ENDPOINT;
+        form = { "action_DELETE": "Delete xUML Service"};
+    } else if(serviceType === NODE_SERVICE_TYPE) {
         endpoint = NODE_SERVICE_REMOVE_ENDPOINT;
         form = { "action_DELETE": "Delete Node.js Service"};
     } else {
         // this is programming error, bail out immediately
-        throw new TypeError('"serviceType" is expected to be "node" or "bridge". Got "' + serviceType + '"');
+        throw new TypeError('"serviceType" is expected to be "node" or "xUML". Got "' + serviceType + '"');
     }
 
     _executeRequest(self._composeRequestObject( endpoint, { "node": node, "instance": name}), form, callback);
 }
 
 /**
- * Remove service from console
+ * Remove service from bridge
  * @param {!string} name Name of the service.
- * @param {!string} type 'bridge' or 'node'
- * @param {(string|function(?Object=))} node Name of the console node. If function type, will be used
+ * @param {!string} type 'xUML' or 'node'
+ * @param {(string|function(?Object=))} node Name of the bridge node. If function type, will be used
  * instead of callback parameter. If null or function, will default to host.
  * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
  */
-Console.prototype.removeService = function(name, type, node, callback){
+Bridge.prototype.removeService = function(name, type, node, callback){
     var self = this;
 
     self._logInAndPerform(function(innerCallback) {
@@ -359,96 +361,96 @@ Console.prototype.removeService = function(name, type, node, callback){
 }
 
 /**
- * Starts bridge service
+ * Starts xUML service
  *
  * @param {!string} name Name of the service.
- * @param {(string|function(?Object=))} node Name of the console node. If function type, will be used
+ * @param {(string|function(?Object=))} node Name of the bridge node. If function type, will be used
  * instead of callback parameter. If null or function, will default to host.
  * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
  */
-Console.prototype.startBridgeService = function( name, node, callback) {
-    this.setServiceStatus("start", name, 'bridge', node, callback);
+Bridge.prototype.startXUMLService = function( name, node, callback) {
+    this.setServiceStatus("start", name, XUML_SERVICE_TYPE, node, callback);
 }
 
 /**
- * Stops bridge service
+ * Stops xUML service
  *
  * @param {!string} name Name of the service.
- * @param {(string|function(?Object=))} node Name of the console node. If function type, will be used
+ * @param {(string|function(?Object=))} node Name of the bridge node. If function type, will be used
  * instead of callback parameter. If null or function, will default to host.
  * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
  */
-Console.prototype.stopBridgeService = function( name, node, callback) {
-    this.setServiceStatus("stop", name, 'bridge', node, callback);
+Bridge.prototype.stopXUMLService = function( name, node, callback) {
+    this.setServiceStatus("stop", name, XUML_SERVICE_TYPE, node, callback);
 }
 
 /**
- * Kills bridge service
+ * Kills xUML service
  *
  * @param {!string} name Name of the service.
- * @param {(string|function(?Object=))} node Name of the console node. If function type, will be used
+ * @param {(string|function(?Object=))} node Name of the bridge node. If function type, will be used
  * instead of callback parameter. If null or function, will default to host.
  * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
  */
-Console.prototype.killBridgeService = function( name, node, callback) {
-    this.setServiceStatus("kill", name, 'bridge', node, callback);
+Bridge.prototype.killXUMLService = function( name, node, callback) {
+    this.setServiceStatus("kill", name, XUML_SERVICE_TYPE, node, callback);
 }
 
 /**
- * Removes bridge service from given node
+ * Removes xUML service from given node
  *
  * @param {!string} name Name of the service.
- * @param {(string|function(?Object=))} node Name of the console node. If function type, will be used
+ * @param {(string|function(?Object=))} node Name of the bridge node. If function type, will be used
  * instead of callback parameter. If null or function, will default to host.
  * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
  */
-Console.prototype.removeBridgeService = function( name, node, callback) {
-    this.removeService(name, 'bridge', node, callback);
+Bridge.prototype.removeXUMLService = function( name, node, callback) {
+    this.removeService(name, XUML_SERVICE_TYPE, node, callback);
 }
 
 /**
  * Starts Node.js service
  *
  * @param {!string} name Name of the service.
- * @param {(string|function(?Object=))} node Name of the console node. If function type, will be used
+ * @param {(string|function(?Object=))} node Name of the bridge node. If function type, will be used
  * instead of callback parameter. If null or function, will default to host.
  * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
  */
-Console.prototype.startNodeService = function( name, node, callback) {
-    this.setServiceStatus("start", name, 'node', node, callback);
+Bridge.prototype.startNodeService = function( name, node, callback) {
+    this.setServiceStatus("start", name, NODE_SERVICE_TYPE, node, callback);
 }
 
 /**
  * Stops Node.js service
  *
  * @param {!string} name Name of the service.
- * @param {(string|function(?Object=))} node Name of the console node. If function type, will be used
+ * @param {(string|function(?Object=))} node Name of the bridge node. If function type, will be used
  * instead of callback parameter. If null or function, will default to host.
  * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
  */
-Console.prototype.stopNodeService = function( name, node, callback) {
-    this.setServiceStatus("stop", name, 'node', node, callback);
+Bridge.prototype.stopNodeService = function( name, node, callback) {
+    this.setServiceStatus("stop", name, NODE_SERVICE_TYPE, node, callback);
 }
 
 /**
  * Removes Node.js service from given node
  *
  * @param {!string} name Name of the service.
- * @param {(string|function(?Object=))} node Name of the console node. If function type, will be used
+ * @param {(string|function(?Object=))} node Name of the bridge node. If function type, will be used
  * instead of callback parameter. If null or function, will default to host.
  * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
  */
-Console.prototype.removeNodeService = function( name, node, callback) {
-    this.removeService(name, 'node', node, callback);
+Bridge.prototype.removeNodeService = function( name, node, callback) {
+    this.removeService(name, NODE_SERVICE_TYPE, node, callback);
 }
 
 /**
- * Deploys service to the console
- * @param {(string|Buffer)} file The absolute file path to the repository (Node.js or bridge) or a Buffer with repository content.
+ * Deploys service to the bridge
+ * @param {(string|Buffer)} file The absolute file path to the repository (Node.js or xUML) or a Buffer with repository content.
  * @param {{startup: boolean, overwrite: boolean, overwrite_settings: boolean}} options Deployment options
  * @param {function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
  */
-Console.prototype.deployService = function( file, options, callback) {
+Bridge.prototype.deployService = function( file, options, callback) {
 
     var self = this;
 
@@ -484,7 +486,7 @@ Console.prototype.deployService = function( file, options, callback) {
  * @param {function(?Object=)} callback  Called when done. If everything goes smoothly, parameter will be null.
  * @private
  */
-Console.prototype._deployService = function(filename, data, options, callback) {
+Bridge.prototype._deployService = function(filename, data, options, callback) {
 
     var self = this;
 
@@ -517,4 +519,4 @@ Console.prototype._deployService = function(filename, data, options, callback) {
     _executeRequest(self._composeRequestObject( FIRMWARE_DEPLOY_ENDPOINT), form, callback);
 }
 
-module.exports = Console;
+module.exports = Bridge;

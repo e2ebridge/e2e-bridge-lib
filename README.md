@@ -1,29 +1,29 @@
-# e2e-console-lib
+# e2e-bridge-lib
 
-Node.js library allowing interaction with E2E Console.
+Node.js library allowing interaction with E2E Bridge.
 
 ## Features
 
-* E2E Bridge and Node.js Services
+* xUML and Node.js Services
     * deploy
     * remove
     * start
     * stop
-* E2E Bridge Services only
+* xUML Services only
     * kill
 
 ## Installation
 ``` bash
-$ npm install e2e-console-lib
+$ npm install e2e-bridge-lib
 ```
 
 ## Usage example
 
 ``` javascript
-var E2EConsole = require('e2e-console-lib');
-var consoleInstance = new E2EConsole('localhost', 8080, 'admin', 'admin');
+var E2EBridge = require('e2e-bridge-lib');
+var bridgeInstance = new E2EBridge('localhost', 8080, 'admin', 'admin');
 
-consoleInstance.startBridgeService('PurchaseOrderExample', function(error){
+bridgeInstance.startXUMLService('PurchaseOrderExample', function(error){
     if(error) {
         console.error('Error occured: ' + error.errorType);
     } else {
