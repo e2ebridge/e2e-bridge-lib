@@ -12,6 +12,8 @@ var xml2js = require('xml2js-expat');
 var fs = require('fs');
 var path = require('path');
 
+var repository = require('./lib/repository');
+
 //fixme: When CON-879 is done
 /** @const */ var ERROR_UNAUTHENTICATED = "The user is not authenticated";
 /** @const */ var BRIDGE_BASE = '/admin/Console';
@@ -519,4 +521,40 @@ Bridge.prototype._deployService = function(filename, data, options, callback) {
     _executeRequest(self._composeRequestObject( FIRMWARE_DEPLOY_ENDPOINT), form, callback);
 }
 
+
+
+/**
+ * Pack a directory
+ * @param {(string)} directory The absolute directory path.
+ * @param {string|{output: string}} options Packing options
+ * @param {function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ */
+function pack( directory, options, callback) {
+
+    if(!options){
+        options = {};
+    }
+
+    if( typeof options === 'function'){
+        callback = options;
+        options = {};
+    }
+
+    if (typeof options === "string") {
+        options = { output: options }
+    }
+
+    fs.readdir(directory, function(err){
+        var output = options.output || path.resolve(directory, 'repository.rep');
+
+        if(err){
+            return callback({ errorType: "Filesystem error", error: err});
+        }
+
+        repository.pack(directory, output, callback);
+    });
+}
+
 module.exports = Bridge;
+
+module.exports.pack = pack;
