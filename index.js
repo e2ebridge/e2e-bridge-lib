@@ -448,7 +448,7 @@ Bridge.prototype.removeNodeService = function( name, node, callback) {
 
 /**
  * Deploys service to the bridge
- * @param {(string|Buffer)} file The absolute file path to the repository (Node.js or xUML) or a Buffer with repository content.
+ * @param {(string|Buffer)} file The absolute file path to the repository (Node.js or xUML), a Buffer with repository content or the absolute directory path to pack and deploy.
  * @param {{startup: boolean, overwrite: boolean, overwrite_settings: boolean}} options Deployment options
  * @param {function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
  */
@@ -466,14 +466,48 @@ Bridge.prototype.deployService = function( file, options, callback) {
             self._deployService('repository.zip', file, options, innerCallback);
         }, callback);
     } else {
-        fs.readFile(file, function(err, data){
-            if( err){
+        fs.stat(file, function(err, stat){
+            var repositoryPath;
+            if (err) {
                 return callback({ errorType: "Filesystem error", error: err});
             }
 
-            self._logInAndPerform(function(innerCallback) {
-                self._deployService(path.basename(file), data, options, innerCallback);
-            }, callback);
+            if(stat.isDirectory()){
+                repositoryPath = path.resolve(file, 'repository.rep');
+
+                pack(file, {output: repositoryPath}, function(err){
+                    if (err) {
+                        return callback({ errorType: "Pack error", error: err});
+                    }
+
+                    file = repositoryPath;
+
+                    fs.readFile(file, function (err, data) {
+                        if (err) {
+                            return callback({ errorType: "Filesystem error", error: err});
+                        }
+
+                        self._logInAndPerform(function (innerCallback) {
+                            self._deployService(path.basename(file), data, options, innerCallback);
+                        }, function(err){
+                            fs.unlink(file,function(){
+                                callback(err);
+                            });
+                        });
+                    });
+
+                });
+            } else {
+                fs.readFile(file, function (err, data) {
+                    if (err) {
+                        return callback({ errorType: "Filesystem error", error: err});
+                    }
+
+                    self._logInAndPerform(function (innerCallback) {
+                        self._deployService(path.basename(file), data, options, innerCallback);
+                    }, callback);
+                });
+            }
         });
     }
 }
