@@ -358,7 +358,7 @@ Bridge.prototype.removeService = function(name, type, node, callback){
     var self = this;
 
     self._logInAndPerform(function(innerCallback) {
-        self._removeService(type, node, name, innerCallback);
+        self._removeService(type, name, node, innerCallback);
     }, callback);
 }
 
