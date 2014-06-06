@@ -473,7 +473,7 @@ Bridge.prototype.deployService = function( file, options, callback) {
             }
 
             if(stat.isDirectory()){
-                repositoryPath = path.resolve(file, 'repository.rep');
+                repositoryPath = path.resolve(file, repositoryName(file));
 
                 pack(file, {output: repositoryPath}, function(err){
                     if (err) {
@@ -579,7 +579,15 @@ function pack( directory, options, callback) {
     }
 
     fs.readdir(directory, function(err){
-        var output = options.output || path.resolve(directory, 'repository.rep');
+        try {
+            var output = path.resolve(directory, archiveName(directory)); // this also ensures that 'directory' contains a valid node.js package
+        } catch (e) {
+            return callback({errorType: "Pack error", error: e});
+        }
+
+        if (options.output) {
+            output = options.output;
+        }
 
         if(err){
             return callback({ errorType: "Filesystem error", error: err});
@@ -587,6 +595,22 @@ function pack( directory, options, callback) {
 
         repository.pack(directory, output, callback);
     });
+}
+
+/**
+ * Builds a archive file name from package.json in directory 'directory'. The filename
+ * will be '<package.name>-<package.version>.zip'. If some information an exception is thrown.
+ *
+ * @param {string} directory the package's directory
+ * @returns {string} the repository file name
+ */
+function archiveName(directory) {
+    var pkg = require('package')(directory);
+    if (pkg && pkg.name && pkg.version) {
+        return pkg.name + '-' + pkg.version + '.zip';
+    } else {
+        throw {errorType: 'Pack error', error: new Error('package.json is incomplete')};
+    }
 }
 
 module.exports = Bridge;
