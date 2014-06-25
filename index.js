@@ -21,10 +21,13 @@ var repository = require('./lib/repository');
 /** @const */ var LOGIN_ENDPOINT = '/Welcome';
 /** @const */ var XUML_SERVICE_TYPE = 'xUML';
 /** @const */ var NODE_SERVICE_TYPE = 'node';
+/** @const */ var JAVA_SERVICE_TYPE = 'java';
 /** @const */ var XUML_SERVICE_STATUS_ENDPOINT = '/BridgeInstanceConfiguration';
 /** @const */ var NODE_SERVICE_STATUS_ENDPOINT = '/nodejs/service/Configuration';
+/** @const */ var JAVA_SERVICE_STATUS_ENDPOINT = '/java/service/Configuration';
 /** @const */ var XUML_SERVICE_REMOVE_ENDPOINT = '/BridgeInstanceDelete';
 /** @const */ var NODE_SERVICE_REMOVE_ENDPOINT = '/nodejs/service/Delete';
+/** @const */ var JAVA_SERVICE_REMOVE_ENDPOINT = '/java/service/Delete';
 /** @const */ var REPOSITORY_CONTENT_TYPE = 'application/octet-stream';
 
 
@@ -93,7 +96,7 @@ function _executeRequest( paramObject, form, callback){
 /**
  * Bridge object
  * @param {string} host
- * @param {integer} port
+ * @param {Integer} port
  * @param {?string} user
  * @param {?string} password
  * @constructor
@@ -136,7 +139,7 @@ Bridge.prototype.login = function( user, password, callback) {
 
     self._ensureLogin(callback);
 
-}
+};
 
 /**
  * Prepare settings for request module.
@@ -169,10 +172,10 @@ Bridge.prototype._composeRequestObject = function(endpoint, getParams) {
         "strictSSL": false, //because bridge uses self-signed certificate
         "jar": self._coockieJar,
         "followAllRedirects": true
-    }
+    };
 
     return ret;
-}
+};
 
 /**
  * Calls the callback after checking if login session is active.
@@ -193,7 +196,7 @@ Bridge.prototype._ensureLogin = function(callback) {
             "j_password": self._password,
             "action_SUBMIT": "Login"
         }, callback);
-}
+};
 
 /**
  * Be sure, that operation will be called only with active login session.
@@ -238,7 +241,7 @@ Bridge.prototype._logInAndPerform = function( operation, callback){
             }
         });
     });
-}
+};
 
 /**
  * Change service status.
@@ -278,13 +281,15 @@ Bridge.prototype._setServiceStatus = function( change, serviceType, name, node, 
         endpoint = XUML_SERVICE_STATUS_ENDPOINT;
     } else if(serviceType === NODE_SERVICE_TYPE) {
         endpoint = NODE_SERVICE_STATUS_ENDPOINT;
+    } else if(serviceType === JAVA_SERVICE_TYPE) {
+        endpoint = JAVA_SERVICE_STATUS_ENDPOINT;
     } else {
         // this is programming error, bail out immediately
         throw new TypeError('"serviceType" is expected to be "node" or "xUML". Got "' + serviceType + '"');
     }
 
     _executeRequest(self._composeRequestObject( endpoint, { "node": node, "instance": name}), form, callback);
-}
+};
 
 /**
  * Start, stop or kill services.
@@ -306,7 +311,7 @@ Bridge.prototype.setServiceStatus = function(status, name, type, node, callback)
     self._logInAndPerform(function(innerCallback) {
         self._setServiceStatus(status, type, name, node, innerCallback);
     }, callback);
-}
+};
 
 /**
  * Remove service from bridge
@@ -338,13 +343,16 @@ Bridge.prototype._removeService = function(serviceType, name, node, callback) {
     } else if(serviceType === NODE_SERVICE_TYPE) {
         endpoint = NODE_SERVICE_REMOVE_ENDPOINT;
         form = { "action_DELETE": "Delete Node.js Service"};
+    } else if(serviceType === JAVA_SERVICE_TYPE) {
+        endpoint = JAVA_SERVICE_REMOVE_ENDPOINT;
+        form = { "action_DELETE": "Delete Java Service"};
     } else {
         // this is programming error, bail out immediately
         throw new TypeError('"serviceType" is expected to be "node" or "xUML". Got "' + serviceType + '"');
     }
 
     _executeRequest(self._composeRequestObject( endpoint, { "node": node, "instance": name}), form, callback);
-}
+};
 
 /**
  * Remove service from bridge
@@ -360,7 +368,7 @@ Bridge.prototype.removeService = function(name, type, node, callback){
     self._logInAndPerform(function(innerCallback) {
         self._removeService(type, name, node, innerCallback);
     }, callback);
-}
+};
 
 /**
  * Starts xUML service
@@ -372,7 +380,7 @@ Bridge.prototype.removeService = function(name, type, node, callback){
  */
 Bridge.prototype.startXUMLService = function( name, node, callback) {
     this.setServiceStatus("start", name, XUML_SERVICE_TYPE, node, callback);
-}
+};
 
 /**
  * Stops xUML service
@@ -384,7 +392,7 @@ Bridge.prototype.startXUMLService = function( name, node, callback) {
  */
 Bridge.prototype.stopXUMLService = function( name, node, callback) {
     this.setServiceStatus("stop", name, XUML_SERVICE_TYPE, node, callback);
-}
+};
 
 /**
  * Kills xUML service
@@ -396,7 +404,7 @@ Bridge.prototype.stopXUMLService = function( name, node, callback) {
  */
 Bridge.prototype.killXUMLService = function( name, node, callback) {
     this.setServiceStatus("kill", name, XUML_SERVICE_TYPE, node, callback);
-}
+};
 
 /**
  * Removes xUML service from given node
@@ -408,7 +416,7 @@ Bridge.prototype.killXUMLService = function( name, node, callback) {
  */
 Bridge.prototype.removeXUMLService = function( name, node, callback) {
     this.removeService(name, XUML_SERVICE_TYPE, node, callback);
-}
+};
 
 /**
  * Starts Node.js service
@@ -420,7 +428,7 @@ Bridge.prototype.removeXUMLService = function( name, node, callback) {
  */
 Bridge.prototype.startNodeService = function( name, node, callback) {
     this.setServiceStatus("start", name, NODE_SERVICE_TYPE, node, callback);
-}
+};
 
 /**
  * Stops Node.js service
@@ -432,7 +440,7 @@ Bridge.prototype.startNodeService = function( name, node, callback) {
  */
 Bridge.prototype.stopNodeService = function( name, node, callback) {
     this.setServiceStatus("stop", name, NODE_SERVICE_TYPE, node, callback);
-}
+};
 
 /**
  * Removes Node.js service from given node
@@ -444,7 +452,43 @@ Bridge.prototype.stopNodeService = function( name, node, callback) {
  */
 Bridge.prototype.removeNodeService = function( name, node, callback) {
     this.removeService(name, NODE_SERVICE_TYPE, node, callback);
-}
+};
+
+/**
+ * Starts Java service
+ *
+ * @param {!string} name Name of the service.
+ * @param {(string|function(?Object=))} node Name of the bridge node. If function type, will be used
+ * instead of callback parameter. If null or function, will default to host.
+ * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ */
+Bridge.prototype.startJavaService = function( name, node, callback) {
+    this.setServiceStatus("start", name, JAVA_SERVICE_TYPE, node, callback);
+};
+
+/**
+ * Stops Java service
+ *
+ * @param {!string} name Name of the service.
+ * @param {(string|function(?Object=))} node Name of the bridge node. If function type, will be used
+ * instead of callback parameter. If null or function, will default to host.
+ * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ */
+Bridge.prototype.stopJavaService = function( name, node, callback) {
+    this.setServiceStatus("stop", name, JAVA_SERVICE_TYPE, node, callback);
+};
+
+/**
+ * Removes Java service from given node
+ *
+ * @param {!string} name Name of the service.
+ * @param {(string|function(?Object=))} node Name of the bridge node. If function type, will be used
+ * instead of callback parameter. If null or function, will default to host.
+ * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ */
+Bridge.prototype.removeJavaService = function( name, node, callback) {
+    this.removeService(name, JAVA_SERVICE_TYPE, node, callback);
+};
 
 /**
  * Deploys service to the bridge
@@ -510,7 +554,7 @@ Bridge.prototype.deployService = function( file, options, callback) {
             }
         });
     }
-}
+};
 
 /**
  * Does the real deployment work.
@@ -553,7 +597,7 @@ Bridge.prototype._deployService = function(filename, data, options, callback) {
     }
 
     _executeRequest(self._composeRequestObject( FIRMWARE_DEPLOY_ENDPOINT), form, callback);
-}
+};
 
 
 
