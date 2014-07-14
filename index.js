@@ -618,11 +618,15 @@ function pack( directory, options, callback) {
         options = {};
     }
 
-    if (typeof options === "string") {
+    if (typeof options === 'string') {
         options = { output: options }
     }
 
     fs.readdir(directory, function(err){
+        if (err) {
+            return callback({errorType: "Filesystem error", error: err});
+        }
+
         try {
             var output = path.resolve(directory, archiveName(directory)); // this also ensures that 'directory' contains a valid node.js package
         } catch (e) {
@@ -633,11 +637,7 @@ function pack( directory, options, callback) {
             output = options.output;
         }
 
-        if(err){
-            return callback({ errorType: "Filesystem error", error: err});
-        }
-
-        repository.pack(directory, output, callback);
+        repository.pack(directory, output, options, callback);
     });
 }
 

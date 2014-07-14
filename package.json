@@ -2,11 +2,16 @@
   "name": "e2e-bridge-lib",
   "version": "0.3.0",
   "dependencies": {
-    "archiver": "0.8.1",
-    "fstream-ignore": "~0.0.5",
+    "archiver": "^0.10.1",
+    "async": "^0.9.0",
+    "easy-child": "0.0.2",
+    "fstream-ignore": "0.0.8",
     "inherits": "2",
+    "npm": "^1.4.19",
     "package": "^1.0.1",
     "request": "2.34.x",
+    "temp": "^0.8.0",
+    "unzip": "^0.1.9",
     "xml2js-expat": "~0.2.2"
   },
   "author": {
@@ -16,7 +21,13 @@
   "maintainers": [
     {
       "name": "Jakub Zakrzewski",
-      "email": "jzakrzewski@e2e.ch"
+      "email": "jzakrzewski@e2ebridge.com"
+    }
+  ],
+  "contributors": [
+    {
+      "name": "Peter Müssig",
+      "email": "pmuessig@e2ebridge.com"
     }
   ],
   "license": "MIT",

@@ -5,13 +5,14 @@ Node.js library allowing interaction with E2E Bridge.
 ## Features
 
 * xUML and Node.js Services
-    * pack
     * deploy
     * remove
     * start
     * stop
 * xUML Services only
     * kill
+* Node.js Services only
+    * pack
 
 ## Installation
 ``` bash
