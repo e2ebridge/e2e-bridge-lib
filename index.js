@@ -14,8 +14,7 @@ var path = require('path');
 
 var repository = require('./lib/repository');
 
-//fixme: When CON-879 is done
-/** @const */ var ERROR_UNAUTHENTICATED = "The user is not authenticated";
+/** @const */ var ERROR_UNAUTHENTICATED = "Empty userid or password!";
 /** @const */ var BRIDGE_BASE = '/admin/Console';
 /** @const */ var FIRMWARE_DEPLOY_ENDPOINT = '/Deploy';
 /** @const */ var LOGIN_ENDPOINT = '/Welcome';
@@ -57,7 +56,7 @@ function _executeRequest( paramObject, form, callback){
 
     var requestObject = request.post( paramObject,
         function(error, response, body) {
-            if (!error && response.statusCode == 200) {
+            if (response.statusCode == 401 || (!error && response.statusCode == 200)) {
                 var parser = new xml2js.Parser(function(result, err) {
                     if (!err) {
                         if(result.Status === 'OK'){
