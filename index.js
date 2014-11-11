@@ -8,7 +8,7 @@
 
 var request = require('request');
 var util = require('util');
-var xml2js = require('xml2js-expat');
+var xml2js = require('xml2js');
 var fs = require('fs');
 var path = require('path');
 
@@ -57,7 +57,7 @@ function _executeRequest( paramObject, form, callback){
     var requestObject = request.post( paramObject,
         function(error, response, body) {
             if (response.statusCode == 401 || (!error && response.statusCode == 200)) {
-                var parser = new xml2js.Parser(function(result, err) {
+                xml2js.parseString(body, { explicitRoot: false, explicitArray: false }, function(err, result) {
                     if (!err) {
                         if(result.Status === 'OK'){
                             callback();
@@ -69,7 +69,6 @@ function _executeRequest( paramObject, form, callback){
                         callback({ errorType: "SAX error", error: err});
                     }
                 });
-                parser.parseBuffer(body, true);
             } else {
                 callback({ errorType: "HTTP error", error: { details: error, response: response}});
             }
