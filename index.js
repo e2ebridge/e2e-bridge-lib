@@ -56,7 +56,7 @@ function _executeRequest( paramObject, form, callback){
 
     var requestObject = request.post( paramObject,
         function(error, response, body) {
-            if (response.statusCode == 401 || (!error && response.statusCode == 200)) {
+            if (!error && (response.statusCode == 401 || response.statusCode == 200)) {
                 xml2js.parseString(body, { explicitRoot: false, explicitArray: false }, function(err, result) {
                     if (!err) {
                         if(result.Status === 'OK'){
