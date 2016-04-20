@@ -515,7 +515,7 @@ Bridge.prototype.deployService = function( file, options, callback) {
             }
 
             if(stat.isDirectory()){
-                repositoryPath = path.resolve(file, repositoryName(file));
+                repositoryPath = path.resolve(file, archiveName(file));
 
                 pack(file, {output: repositoryPath}, function(err){
                     if (err) {
