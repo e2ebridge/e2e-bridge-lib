@@ -190,10 +190,10 @@ Bridge.prototype._ensureLogin = function(callback) {
     }
 
     _executeRequest(self._composeRequestObject( LOGIN_ENDPOINT), {
-            "j_username": self._user,
-            "j_password": self._password,
-            "action_SUBMIT": "Login"
-        }, callback);
+        "j_username": self._user,
+        "j_password": self._password,
+        "action_SUBMIT": "Login"
+    }, callback);
 };
 
 /**
@@ -592,6 +592,12 @@ Bridge.prototype._deployService = function(filename, data, options, callback) {
     }
     if( options.overwrite_settings){
         form.input_overwrite_settings = 'true';
+    }
+    if( options.npm_install){
+        form.input_run_npm_install = 'true';
+    }
+    if( options.npm_install_run_scripts){
+        form.input_npm_install_run_scripts = 'true';
     }
 
     _executeRequest(self._composeRequestObject( FIRMWARE_DEPLOY_ENDPOINT), form, callback);
