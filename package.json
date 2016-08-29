@@ -1,13 +1,13 @@
 {
   "name": "e2e-bridge-lib",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "dependencies": {
     "archiver": "^0.10.1",
     "async": "^0.9.0",
     "easy-child": "0.0.2",
     "fstream-ignore": "0.0.8",
     "inherits": "2",
-    "npm": "^1.4.19",
+    "npm": "^2.15.5",
     "package": "^1.0.1",
     "request": "2.34.x",
     "temp": "^0.8.0",
