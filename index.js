@@ -599,6 +599,9 @@ Bridge.prototype._deployService = function(filename, data, options, callback) {
     if( options.npm_install_run_scripts){
         form.input_npm_install_run_scripts = 'true';
     }
+    if( options.instance_name){
+        form.input_instance_name = options.instance_name;
+    }
 
     _executeRequest(self._composeRequestObject( FIRMWARE_DEPLOY_ENDPOINT), form, callback);
 };
