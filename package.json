@@ -7,7 +7,7 @@
     "easy-child": "0.0.2",
     "fstream-ignore": "0.0.8",
     "inherits": "2",
-    "npm": "^2.15.5",
+    "npm": "3.x",
     "package": "^1.0.1",
     "request": "2.34.x",
     "temp": "^0.8.0",
@@ -15,7 +15,7 @@
     "xml2js": "^0.4.4"
   },
   "author": {
-    "name": "E2E Technologies Ltd",
+    "name": "Scheer E2E AG",
     "email": "support@e2ebridge.com"
   },
   "maintainers": [
