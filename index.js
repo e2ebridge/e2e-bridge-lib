@@ -7,15 +7,16 @@
 "use strict";
 
 var request = require('request');
-var util = require('util');
 var xml2js = require('xml2js');
 var fs = require('fs');
 var path = require('path');
 
 var repository = require('./lib/repository');
+var endpoints = require('./lib/endpoints');
 
 /** @const */ var ERROR_UNAUTHENTICATED = "Empty userid or password!";
 /** @const */ var BRIDGE_BASE = '/admin/Console';
+/** @const */ var BRIDGE_REST_API_BASE = '/bridge/rest';
 /** @const */ var FIRMWARE_DEPLOY_ENDPOINT = '/Deploy';
 /** @const */ var LOGIN_ENDPOINT = '/Welcome';
 /** @const */ var XUML_SERVICE_TYPE = 'xUML';
@@ -28,6 +29,16 @@ var repository = require('./lib/repository');
 /** @const */ var NODE_SERVICE_REMOVE_ENDPOINT = '/nodejs/service/Delete';
 /** @const */ var JAVA_SERVICE_REMOVE_ENDPOINT = '/java/service/Delete';
 /** @const */ var REPOSITORY_CONTENT_TYPE = 'application/octet-stream';
+
+
+/** @const */ var HTTP_DELETE  = 'DELETE';
+/** @const */ var HTTP_GET     = 'GET';
+/** @const */ var HTTP_HEAD    = 'HEAD';
+/** @const */ var HTTP_OPTIONS = 'OPTIONS';
+/** @const */ var HTTP_PATCH   = 'PATCH';
+/** @const */ var HTTP_POST    = 'POST';
+/** @const */ var HTTP_PUT     = 'PUT';
+// TRACE & CONNECT are N/A
 
 
 function _defaultCallback(err) {
@@ -663,6 +674,234 @@ function archiveName(directory) {
         throw {errorType: 'Pack error', error: new Error('package.json is incomplete')};
     }
 }
+
+/* *************************** New REST Interface *************************** */
+
+/**
+ * Handle results of any Bridge API operation.
+ * @callback bridgeApiCallback
+ * @param {?Object} err Error object if error occurred.
+ * @param {?Object=} response Response object if no error occurred.
+ */
+
+/**
+ * Default callback for REST Bridge API
+ * @type {bridgeApiCallback}
+ */
+function _defaultRestCallback(err, response) {
+    if(err) {
+        console.error(err);
+    } else if(response){
+        console.log(response);
+    }
+}
+
+/**
+ * Remove technical properties from the response.
+ * These shouldn't be interesting for the library user.
+ * @param {bridgeApiCallback} next Callback to call after cleanup.
+ * @param {?Object} error Error object. Will not be cleaned. Will be forwarded to callback.
+ * @param {?Object=} response Response object. Will be cleaned. Cleaned version will be forwarded to callback.
+ * @returns {*} whatever the callback returns.
+ * @private
+ */
+function _cleanResponse(next, error, response) {
+    if(response) {
+        delete response.service;
+        delete response.link;
+    }
+    return next(error, response);
+}
+
+/**
+ * Runs the REST request according to given options.
+ * @param {Object} options Valid options for the request module.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
+ * @private
+ */
+function _executeRestRequest(options, callback) {
+
+    if(!callback) {
+        callback = _defaultRestCallback;
+    } else {
+        callback = _cleanResponse.bind(null, callback);
+    }
+
+    request(options,
+        function(error, response, body) {
+            if (!error && response.statusCode == 200) {
+                callback(null, body)
+            } else if(!error){
+                callback({ errorType: "Bridge error", error: body});
+            } else {
+                callback({ errorType: "HTTP error", error: { details: error, response: response}});
+            }
+        });
+}
+
+/**
+ * Prepare settings for request module.
+ * @param {!string} method Valid HTTP verb (GET, POST, PUT...)
+ * @param {!string} endpoint Bridge endpoint, we intend to call
+ * @param {?Object=} content Body to send with the request. Valid for POST, PUT and PATCH.
+ * @param {?Object=} getParams URI GET parameters to attach to endpoint (key-value pairs)
+ * @returns {Object}
+ * @private
+ */
+Bridge.prototype._composeRestRequestObject = function(method, endpoint, content, getParams) {
+
+    let self = this;
+
+    method = method.toUpperCase();
+
+    let ret = {
+        "url": 'https://' + self._host + ':' + self._port + BRIDGE_REST_API_BASE + endpoint,
+        "qs": getParams,
+        "method": method,
+        "strictSSL": false, //because bridge uses self-signed certificate
+        "followAllRedirects": true,
+        "auth": {
+            "user": self._user,
+            "pass": self._password,
+            "sendImmediately": true
+        }
+    };
+
+    if(content && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
+        ret.json = content;
+    } else {
+        ret.json = true;
+    }
+
+    return ret;
+};
+
+/**
+ * Get currently active preferences of the given service.
+ * @param {!string} name Name of the service.
+ * @param {!string} serviceType valid service type: 'xUML', 'node'...
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
+ */
+Bridge.prototype.getServicePreferences = function(name, serviceType, callback) {
+    let self = this;
+
+    _executeRestRequest(
+        self._composeRestRequestObject(
+            HTTP_GET,
+            endpoints.getEndpoint(serviceType, name, 'preferences', HTTP_GET)),
+        callback);
+};
+
+/**
+ * Get currently active preferences of the given xUML service.
+ * @param {!string} name Name of the service.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
+ */
+Bridge.prototype.getXUMLServicePreferences = function(name, callback) {
+    let self = this;
+    self.getServicePreferences(name, XUML_SERVICE_TYPE, callback);
+};
+
+/**
+ * Get currently active preferences of the given Node.js service.
+ * @param {!string} name Name of the service.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
+ */
+Bridge.prototype.getNodeServicePreferences = function(name, callback) {
+    let self = this;
+    self.getServicePreferences(name, NODE_SERVICE_TYPE, callback);
+};
+
+/**
+ * Get currently active preferences of the given Java service.
+ * @param {!string} name Name of the service.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
+ */
+Bridge.prototype.getJavaServicePreferences = function(name, callback) {
+    let self = this;
+    self.getServicePreferences(name, JAVA_SERVICE_TYPE, callback);
+};
+
+/**
+ * Set service preferences.
+ * @param {!string} name Name of the service.
+ * @param {!string} serviceType valid service type: 'xUML', 'node'...
+ * @param {!Object} preferences Hash of the service preferences. Possible keys depend on service type.
+ *                              Refer to Bridge API documentation.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
+ */
+Bridge.prototype.setServicePreferences = function(name, serviceType, preferences, callback) {
+    let self = this;
+
+    let getCallback = function(error, currentPreferences) {
+        let correct = Object.keys(preferences).every(function(k) {
+            if(!currentPreferences.hasOwnProperty(k)) {
+                callback({ errorType: "Usage error", error: {details: "Property '" + k + "' is unknown to the Bridge."}});
+                return false;
+            } else if(typeof currentPreferences[k] !== typeof preferences[k]) {
+                callback({ errorType: "Usage error", error: {details: "Property '" + k + "' has a wrong type."}});
+                return false;
+            }
+            return true;
+        });
+
+        if(!correct) {
+            return;
+        }
+
+        let newPreferences = Object.assign({}, currentPreferences, preferences);
+        _executeRestRequest(
+            self._composeRestRequestObject(
+                HTTP_PUT,
+                endpoints.getEndpoint(serviceType, name, 'preferences', HTTP_PUT),
+                newPreferences),
+            function(error, response) {
+                if(!error && !response) {
+                    response = newPreferences;
+                }
+                callback(error, response);
+            });
+    };
+
+    _executeRestRequest(
+        self._composeRestRequestObject(
+            HTTP_GET,
+            endpoints.getEndpoint(serviceType, name, 'preferences', HTTP_GET)),
+        getCallback);
+};
+
+/**
+ * Set xUML service preferences.
+ * @param {!string} name Name of the service.
+ * @param {!Object} preferences Hash of the service preferences. For possible keys refer to Bridge API documentation.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
+ */
+Bridge.prototype.setXUMLServicePreferences = function(name, preferences, callback) {
+    let self = this;
+    self.setServicePreferences(name, XUML_SERVICE_TYPE, preferences, callback);
+};
+
+/**
+ * Set Node.js service preferences.
+ * @param {!string} name Name of the service.
+ * @param {!Object} preferences Hash of the service preferences. For possible keys refer to Bridge API documentation.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
+ */
+Bridge.prototype.setNodeServicePreferences = function(name, preferences, callback) {
+    let self = this;
+    self.setServicePreferences(name, NODE_SERVICE_TYPE, preferences, callback);
+};
+
+/**
+ * Set Java service preferences.
+ * @param {!string} name Name of the service.
+ * @param {!Object} preferences Hash of the service preferences. For possible keys refer to Bridge API documentation.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
+ */
+Bridge.prototype.setJavaServicePreferences = function(name, preferences, callback) {
+    let self = this;
+    self.setServicePreferences(name, JAVA_SERVICE_TYPE, preferences, callback);
+};
 
 module.exports = Bridge;
 
