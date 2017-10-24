@@ -834,6 +834,10 @@ Bridge.prototype.setServicePreferences = function(name, serviceType, preferences
     let self = this;
 
     let getCallback = function(error, currentPreferences) {
+        if(error) {
+            return callback(error);
+        }
+
         let correct = Object.keys(preferences).every(function(k) {
             if(!currentPreferences.hasOwnProperty(k)) {
                 callback({ errorType: "Usage error", error: {details: "Property '" + k + "' is unknown to the Bridge."}});
