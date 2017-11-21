@@ -954,6 +954,52 @@ Bridge.prototype.getJavaServicePreferences = function(name, callback) {
 };
 
 /**
+ * Get currently active settings of the given service.
+ * @param {!string} name Name of the service.
+ * @param {!string} serviceType valid service type: 'xUML', 'node'...
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
+ */
+Bridge.prototype.getServiceSettings = function(name, serviceType, callback) {
+    let self = this;
+
+    _executeRestRequest(
+        self._composeRestRequestObject(
+            HTTP_GET,
+            endpoints.getEndpoint(serviceType, name, 'settings', HTTP_GET)),
+        callback);
+};
+
+/**
+ * Get currently active preferences of the given xUML service.
+ * @param {!string} name Name of the service.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
+ */
+Bridge.prototype.getXUMLServiceSettings = function(name, callback) {
+    let self = this;
+    self.getServiceSettings(name, XUML_SERVICE_TYPE, callback);
+};
+
+/**
+ * Get currently active preferences of the given Node.js service.
+ * @param {!string} name Name of the service.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
+ */
+Bridge.prototype.getNodeServiceSettings = function(name, callback) {
+    let self = this;
+    self.getServiceSettings(name, NODE_SERVICE_TYPE, callback);
+};
+
+/**
+ * Get currently active preferences of the given Java service.
+ * @param {!string} name Name of the service.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
+ */
+Bridge.prototype.getJavaServiceSettings = function(name, callback) {
+    let self = this;
+    self.getServiceSettings(name, JAVA_SERVICE_TYPE, callback);
+};
+
+/**
  * Set service preferences.
  * @param {!string} name Name of the service.
  * @param {!string} serviceType valid service type: 'xUML', 'node'...
@@ -1036,6 +1082,94 @@ Bridge.prototype.setNodeServicePreferences = function(name, preferences, callbac
 Bridge.prototype.setJavaServicePreferences = function(name, preferences, callback) {
     let self = this;
     self.setServicePreferences(name, JAVA_SERVICE_TYPE, preferences, callback);
+};
+
+/**
+ * Set service settings.
+ * @param {!string} name Name of the service.
+ * @param {!string} serviceType valid service type: 'xUML', 'node'...
+ * @param {!Object} settings Hash of the service settings. Possible keys depend on service type.
+ *                              Refer to Bridge API documentation.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
+ */
+Bridge.prototype.setServiceSettings = function(name, serviceType, settings, callback) {
+    let self = this;
+
+    let getCallback = function(error, currentSettings) {
+        if(error) {
+            return callback(error);
+        }
+        let newSettings = {setting: []};
+        let correct = Object.keys(settings).every(function(k) {
+            let referenceSetting = currentSettings.setting.find(x => x.id === k);
+            if (!referenceSetting) {
+                callback({ errorType: "Usage error", error: {details: "Setting '" + k + "' is unknown to the Bridge."}});
+                return false;
+            }
+            newSettings.setting.push({"id": k, "currentValue": settings[k] });
+            return true;
+        });
+
+        if(!correct) {
+            return;
+        }
+
+        _executeRestRequest(
+            self._composeRestRequestObject(
+                HTTP_PUT,
+                endpoints.getEndpoint(serviceType, name, 'settings', HTTP_PUT),
+                newSettings),
+            function(error, response) {
+                if(!error && !response) {
+                    _executeRestRequest(
+                        self._composeRestRequestObject(
+                            HTTP_GET,
+                            endpoints.getEndpoint(serviceType, name, 'settings', HTTP_GET)),
+                        callback);
+                } else {
+                    callback(error, response);
+                }
+            });
+    };
+
+    _executeRestRequest(
+        self._composeRestRequestObject(
+            HTTP_GET,
+            endpoints.getEndpoint(serviceType, name, 'settings', HTTP_GET)),
+        getCallback);
+};
+
+/**
+ * Set xUML service settings.
+ * @param {!string} name Name of the service.
+ * @param {!Object} preferences Hash of the service preferences. For possible keys refer to Bridge API documentation.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
+ */
+Bridge.prototype.setXUMLServiceSettings = function(name, settings, callback) {
+    let self = this;
+    self.setServiceSettings(name, XUML_SERVICE_TYPE, settings, callback);
+};
+
+/**
+ * Set Node.js service settings.
+ * @param {!string} name Name of the service.
+ * @param {!Object} preferences Hash of the service preferences. For possible keys refer to Bridge API documentation.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
+ */
+Bridge.prototype.setNodeServiceSettings = function(name, settings, callback) {
+    let self = this;
+    self.setServiceSettings(name, NODE_SERVICE_TYPE, settings, callback);
+};
+
+/**
+ * Set Java service settings.
+ * @param {!string} name Name of the service.
+ * @param {!Object} preferences Hash of the service preferences. For possible keys refer to Bridge API documentation.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
+ */
+Bridge.prototype.setJavaServiceSettings = function(name, settings, callback) {
+    let self = this;
+    self.setServiceSettings(name, JAVA_SERVICE_TYPE, settings, callback);
 };
 
 module.exports = Bridge;

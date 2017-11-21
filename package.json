@@ -32,6 +32,10 @@
     {
       "name": "Ewgeni Wolowik",
       "email": "ewgeni.wolowikg@scheer-group.com"
+    },
+    {
+      "name": "Django Ruppmann",
+      "email": "druppmann@e2ebridge.com"
     }
   ],
   "license": "MIT",

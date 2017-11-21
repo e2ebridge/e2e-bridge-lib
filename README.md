@@ -10,6 +10,8 @@ Node.js library allowing interaction with E2E Bridge.
     * start
     * stop
     * view / set service preferences
+    * view / set service settings
+    
 * xUML Services only
     * kill
 * Node.js Services only
