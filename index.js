@@ -18,6 +18,10 @@ var endpoints = require('./lib/endpoints');
 /** @const */ var BRIDGE_BASE = '/admin/Console';
 /** @const */ var BRIDGE_REST_API_BASE = '/bridge/rest';
 /** @const */ var FIRMWARE_DEPLOY_ENDPOINT = '/Deploy';
+/** @const */ var GROUP_CREATE_ENDPOINT = '/DomainGroupCreate';
+/** @const */ var GROUP_DELETE_ENDPOINT = '/DomainGroupDelete';
+/** @const */ var USER_CREATE_ENDPOINT = '/DomainUserCreate';
+/** @const */ var USER_DELETE_ENDPOINT = '/DomainUserDelete';
 /** @const */ var LOGIN_ENDPOINT = '/Welcome';
 /** @const */ var XUML_SERVICE_TYPE = 'xUML';
 /** @const */ var NODE_SERVICE_TYPE = 'node';
@@ -617,7 +621,134 @@ Bridge.prototype._deployService = function(filename, data, options, callback) {
     _executeRequest(self._composeRequestObject( FIRMWARE_DEPLOY_ENDPOINT), form, callback);
 };
 
+/**
+ * Create group
+ * @param {{input_group_id: string, input_group_name: string, input_role: string}} options group options
+ * @param {function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ */
+Bridge.prototype.createGroup = function( options, callback) {
 
+    var self = this;
+
+    self._logInAndPerform(function (innerCallback) {
+        self._createGroup(options, innerCallback);
+    }, callback);
+}
+
+/**
+ * Does the real group create work.
+ *
+ * @param {{input_group_id: string, input_group_name: string, input_role: string}} options group options
+ * @param {function(?Object=)} callback  Called when done. If everything goes smoothly, parameter will be null.
+ * @private
+ */
+Bridge.prototype._createGroup = function( options, callback) {
+
+    var self = this;
+
+    var form = { "action_CREATE": "Create Group"};
+
+    form.input_group_id = options.input_group_id;
+    form.input_group_name = options.input_group_name;
+    form.input_role = options.input_role;
+
+    _executeRequest(self._composeRequestObject( GROUP_CREATE_ENDPOINT ), form, callback);
+}
+
+/**
+ * Remove group
+ * @param {{group_id: string}} options group_id of group to be removed
+ * @param {function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ */
+Bridge.prototype.deleteGroup = function( options, callback) {
+
+    var self = this;
+
+    self._logInAndPerform(function (innerCallback) {
+        self._deleteGroup(options, innerCallback);
+    }, callback);
+}
+
+/**
+ * Does the real group remove work.
+ *
+ * @param {{group_id: string}} options group_id of group to be removed
+ * @param {function(?Object=)} callback  Called when done. If everything goes smoothly, parameter will be null.
+ * @private
+ */
+Bridge.prototype._deleteGroup = function( options, callback) {
+    var self = this;
+
+    var form = { "action_DELETE": "Delete group"};
+
+    _executeRequest(self._composeRequestObject( GROUP_DELETE_ENDPOINT, { "group": options.group_id}), form, callback);
+}
+
+/**
+ * Create group
+ * @param {{input_user_id: string, input_user_name: string, input_active: boolean, input_group: String, input_user_password1: String, input_user_password2: String}} options user options
+ * @param {function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ */
+Bridge.prototype.createUser = function( options, callback) {
+
+    var self = this;
+
+    self._logInAndPerform(function (innerCallback) {
+        self._createUser(options, innerCallback);
+    }, callback);
+}
+
+/**
+ * Does the real user create work.
+ *
+ * @param {{input_user_id: string, input_user_name: string, input_active: boolean, input_group: String, input_user_password: String}} options user options
+ * @param {function(?Object=)} callback  Called when done. If everything goes smoothly, parameter will be null.
+ * @private
+ */
+Bridge.prototype._createUser = function( options, callback) {
+
+    var self = this;
+
+    var form = { "action_CREATE": "Create User"};
+
+    form.input_user_id = options.input_user_id;
+    form.input_user_name = options.input_user_name;
+    form.input_active = options.input_active;
+    form.input_group = options.input_group;
+    form.input_user_password1 = options.input_user_password;
+    form.input_user_password2 = options.input_user_password;
+
+    _executeRequest(self._composeRequestObject( USER_CREATE_ENDPOINT ), form, callback);
+}
+
+/**
+ * Remove user
+ * @param {{user_id: string}} options user_id of user to be removed
+ * @param {function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ */
+Bridge.prototype.deleteUser = function( options, callback) {
+
+    var self = this;
+
+    self._logInAndPerform(function (innerCallback) {
+        self._deleteUser(options, innerCallback);
+    }, callback);
+}
+
+/**
+ * Does the real user remove work.
+ *
+ * @param {{user_id: string}} options user_id of user to be removed
+ * @param {function(?Object=)} callback  Called when done. If everything goes smoothly, parameter will be null.
+ * @private
+ */
+Bridge.prototype._deleteUser = function( options, callback) {
+    var self = this;
+
+    var form = { "action_DELETE": "Delete user"};
+
+    _executeRequest(self._composeRequestObject( USER_DELETE_ENDPOINT, { "user": options.user_id}), form, callback);
+}
 
 /**
  * Pack a directory
