@@ -777,7 +777,7 @@ function pack( directory, options, callback) {
         }
 
         try {
-            var output = path.resolve(directory, archiveName(directory)); // this also ensures that 'directory' contains a valid node.js package
+            var output = path.resolve(archiveName(directory)); // this also ensures that 'directory' contains a valid node.js package
         } catch (e) {
             return callback({errorType: "Pack error", error: e});
         }
