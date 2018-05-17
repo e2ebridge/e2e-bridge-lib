@@ -10,6 +10,7 @@ var request = require('request');
 var xml2js = require('xml2js');
 var fs = require('fs');
 var path = require('path');
+const tmp = require('tmp');
 
 var repository = require('./lib/repository');
 var endpoints = require('./lib/endpoints');
@@ -530,7 +531,7 @@ Bridge.prototype.deployService = function( file, options, callback) {
             }
 
             if(stat.isDirectory()){
-                repositoryPath = path.resolve(file, archiveName(file));
+                repositoryPath = tmp.fileSync({prefix: archiveName(file)}).name;
 
                 pack(file, {output: repositoryPath}, function(err){
                     if (err) {
