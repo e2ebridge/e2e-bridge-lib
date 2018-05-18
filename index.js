@@ -1143,7 +1143,7 @@ Bridge.prototype.setServiceSettings = function(name, serviceType, settings, call
 /**
  * Set xUML service settings.
  * @param {!string} name Name of the service.
- * @param {!Object} preferences Hash of the service preferences. For possible keys refer to Bridge API documentation.
+ * @param {!Object} settings Hash of the service settings. For possible keys refer to Bridge API documentation.
  * @param {bridgeApiCallback=} callback Function to call upon completion.
  */
 Bridge.prototype.setXUMLServiceSettings = function(name, settings, callback) {
@@ -1154,7 +1154,7 @@ Bridge.prototype.setXUMLServiceSettings = function(name, settings, callback) {
 /**
  * Set Node.js service settings.
  * @param {!string} name Name of the service.
- * @param {!Object} preferences Hash of the service preferences. For possible keys refer to Bridge API documentation.
+ * @param {!Object} settings Hash of the service settings. For possible keys refer to Bridge API documentation.
  * @param {bridgeApiCallback=} callback Function to call upon completion.
  */
 Bridge.prototype.setNodeServiceSettings = function(name, settings, callback) {
@@ -1165,7 +1165,7 @@ Bridge.prototype.setNodeServiceSettings = function(name, settings, callback) {
 /**
  * Set Java service settings.
  * @param {!string} name Name of the service.
- * @param {!Object} preferences Hash of the service preferences. For possible keys refer to Bridge API documentation.
+ * @param {!Object} settings Hash of the service settings. For possible keys refer to Bridge API documentation.
  * @param {bridgeApiCallback=} callback Function to call upon completion.
  */
 Bridge.prototype.setJavaServiceSettings = function(name, settings, callback) {
