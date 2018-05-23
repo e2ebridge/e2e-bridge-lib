@@ -2,7 +2,7 @@
   "name": "e2e-bridge-lib",
   "version": "1.4.0",
   "scripts": {
-    "test": "cross-env node $NODE_DEBUG_OPTION node_modules/jasmine/bin/jasmine"
+    "test": "cross-env node $NODE_DEBUG_OPTION ./node_modules/jasmine-xml-reporter/bin/jasmine.js"
   },
   "dependencies": {
     "archiver": "^2.1.0",
@@ -21,6 +21,7 @@
   "devDependencies": {
     "cross-env": "^5.1.5",
     "jasmine": "^3.1.0",
+    "jasmine-xml-reporter": "^1.2.1",
     "nock": "^9.1.6"
   },
   "author": {
