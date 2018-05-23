@@ -7,7 +7,9 @@ const BRIDGE_PORT = (process.env.BRIDGE_PORT && parseInt(process.env.BRIDGE_PORT
 const BRIDGE_USER = process.env.BRIDGE_USER || "user";
 const BRIDGE_PW = process.env.BRIDGE_PW || "secret";
 const BRIDGE_NODE = process.env.BRIDGE_NODE || "localhost";
-const SERVICE_INSTANCE = process.env.SERVICE_INSTANCE || "TestService";
+const XUML_SERVICE_INSTANCE = process.env.XUML_SERVICE_INSTANCE || "xUMLTestService";
+const NODEJS_SERVICE_INSTANCE = process.env.NODEJS_SERVICE_INSTANCE || "NodeTestService";
+const JAVA_SERVICE_INSTANCE = process.env.JAVA_SERVICE_INSTANCE || "JavaTestService";
 
 const BRIDGE_BASE = `https://${BRIDGE_HOST}:${BRIDGE_PORT}`;
 
@@ -24,7 +26,9 @@ module.exports = {
     user: BRIDGE_USER,
     password: BRIDGE_PW,
     node: BRIDGE_NODE,
-    serviceInstance: SERVICE_INSTANCE,
+    xUmlServiceInstance: XUML_SERVICE_INSTANCE,
+    nodeJsServiceInstance: NODEJS_SERVICE_INSTANCE,
+    javaServiceInstance: JAVA_SERVICE_INSTANCE,
     base: BRIDGE_BASE,
     okMsg: MSG_OK,
 

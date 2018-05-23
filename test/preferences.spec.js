@@ -11,7 +11,7 @@ function makeChangedPreferences(preferences, changes) {
 
 describe( "Preferences module", function() {
     let scope;
-    const serviceUriPath = `/bridge/rest/services/xuml/${helper.serviceInstance}`;
+    const serviceUriPath = `/bridge/rest/services/xuml/${helper.xUmlServiceInstance}`;
     const serviceUri = `${helper.base}/${serviceUriPath}`;
 
     const links = [
@@ -36,7 +36,7 @@ describe( "Preferences module", function() {
 
     function makeResponseObject(preferencesToInclude) {
         let result = {
-            "service": helper.serviceInstance,
+            "service": helper.xUmlServiceInstance,
             "link": links
         };
         Object.keys(preferencesToInclude).forEach(p => {
@@ -49,7 +49,7 @@ describe( "Preferences module", function() {
 
         scope = nock(helper.base);
         if(process.env.NOCK_OFF === 'true') {
-            helper.makeBridgeInstance().setXUMLServicePreferences(helper.serviceInstance,
+            helper.makeBridgeInstance().setXUMLServicePreferences(helper.xUmlServiceInstance,
                 preferences,
                 function(/*err, res*/) {
                     done();
@@ -69,7 +69,7 @@ describe( "Preferences module", function() {
         scope.get(`${serviceUriPath}/preferences`)
              .reply(200, makeResponseObject(preferences));
 
-        helper.makeBridgeInstance().getXUMLServicePreferences(helper.serviceInstance, function(err, res) {
+        helper.makeBridgeInstance().getXUMLServicePreferences(helper.xUmlServiceInstance, function(err, res) {
             expect(err).toBeFalsy();
 
             expect(res).toEqual(preferences);
@@ -90,7 +90,7 @@ describe( "Preferences module", function() {
         scope.put(`${serviceUriPath}/preferences`, preferencesAfter)
              .reply(200, undefined);
 
-        helper.makeBridgeInstance().setXUMLServicePreferences(helper.serviceInstance,
+        helper.makeBridgeInstance().setXUMLServicePreferences(helper.xUmlServiceInstance,
             changes,
             function(err, res) {
                 expect(err).toBeFalsy();
@@ -114,7 +114,7 @@ describe( "Preferences module", function() {
         scope.put(`${serviceUriPath}/preferences`, preferencesAfter)
             .reply(200, undefined);
 
-        helper.makeBridgeInstance().setXUMLServicePreferences(helper.serviceInstance,
+        helper.makeBridgeInstance().setXUMLServicePreferences(helper.xUmlServiceInstance,
             changes,
             function(err, res) {
                 expect(err).toBeFalsy();
@@ -142,7 +142,7 @@ describe( "Preferences module", function() {
         scope.put(`${serviceUriPath}/preferences`, preferencesAfter)
             .reply(200, undefined);
 
-        helper.makeBridgeInstance().setXUMLServicePreferences(helper.serviceInstance,
+        helper.makeBridgeInstance().setXUMLServicePreferences(helper.xUmlServiceInstance,
             changes,
             function(err, res) {
                 expect(err).toBeFalsy();

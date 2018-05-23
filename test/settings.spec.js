@@ -12,7 +12,7 @@ function makeChangedSettings(settings, changes) {
 
 describe( "Settings module", function() {
     let scope;
-    const serviceUriPath = `/bridge/rest/services/xuml/${helper.serviceInstance}`;
+    const serviceUriPath = `/bridge/rest/services/xuml/${helper.xUmlServiceInstance}`;
     const serviceUri = `${helper.base}/${serviceUriPath}`;
 
     const links = [
@@ -64,12 +64,12 @@ describe( "Settings module", function() {
 
         scope.get(`${serviceUriPath}/settings`)
              .reply(200, {
-                 "service": helper.serviceInstance,
+                 "service": helper.xUmlServiceInstance,
                  "link": links,
                  "setting": settings
              });
 
-        helper.makeBridgeInstance().getXUMLServiceSettings(helper.serviceInstance, function(err, res) {
+        helper.makeBridgeInstance().getXUMLServiceSettings(helper.xUmlServiceInstance, function(err, res) {
             expect(err).toBeFalsy();
 
             expect(res.setting).toEqual(settings);
@@ -88,7 +88,7 @@ describe( "Settings module", function() {
 
         scope.get(`${serviceUriPath}/settings`)
              .reply(200, {
-                 "service": helper.serviceInstance,
+                 "service": helper.xUmlServiceInstance,
                  "link": links,
                  "setting": settings
              });
@@ -98,12 +98,12 @@ describe( "Settings module", function() {
 
         scope.get(`${serviceUriPath}/settings`)
              .reply(200, {
-                 "service": helper.serviceInstance,
+                 "service": helper.xUmlServiceInstance,
                  "link": links,
                  "setting": settingsAfter
              });
 
-        helper.makeBridgeInstance().setXUMLServiceSettings(helper.serviceInstance,
+        helper.makeBridgeInstance().setXUMLServiceSettings(helper.xUmlServiceInstance,
             changes,
             function(err, res) {
                 expect(err).toBeFalsy();
@@ -125,7 +125,7 @@ describe( "Settings module", function() {
 
         scope.get(`${serviceUriPath}/settings`)
             .reply(200, {
-                "service": helper.serviceInstance,
+                "service": helper.xUmlServiceInstance,
                 "link": links,
                 "setting": settings
             });
@@ -135,12 +135,12 @@ describe( "Settings module", function() {
 
         scope.get(`${serviceUriPath}/settings`)
             .reply(200, {
-                "service": helper.serviceInstance,
+                "service": helper.xUmlServiceInstance,
                 "link": links,
                 "setting": settingsAfter
             });
 
-        helper.makeBridgeInstance().setXUMLServiceSettings(helper.serviceInstance,
+        helper.makeBridgeInstance().setXUMLServiceSettings(helper.xUmlServiceInstance,
             changes,
             function(err, res) {
                 expect(err).toBeFalsy();
@@ -162,7 +162,7 @@ describe( "Settings module", function() {
 
         scope.get(`${serviceUriPath}/settings`)
             .reply(200, {
-                "service": helper.serviceInstance,
+                "service": helper.xUmlServiceInstance,
                 "link": links,
                 "setting": settings
             });
@@ -172,12 +172,12 @@ describe( "Settings module", function() {
 
         scope.get(`${serviceUriPath}/settings`)
             .reply(200, {
-                "service": helper.serviceInstance,
+                "service": helper.xUmlServiceInstance,
                 "link": links,
                 "setting": settingsAfter
             });
 
-        helper.makeBridgeInstance().setXUMLServiceSettings(helper.serviceInstance,
+        helper.makeBridgeInstance().setXUMLServiceSettings(helper.xUmlServiceInstance,
             changes,
             function(err, res) {
                 expect(err).toBeFalsy();
@@ -203,7 +203,7 @@ describe( "Settings module", function() {
 
         scope.get(`${serviceUriPath}/settings`)
             .reply(200, {
-                "service": helper.serviceInstance,
+                "service": helper.xUmlServiceInstance,
                 "link": links,
                 "setting": settings
             });
@@ -219,12 +219,12 @@ describe( "Settings module", function() {
 
         scope.get(`${serviceUriPath}/settings`)
             .reply(200, {
-                "service": helper.serviceInstance,
+                "service": helper.xUmlServiceInstance,
                 "link": links,
                 "setting": settingsAfter
             });
 
-        helper.makeBridgeInstance().setXUMLServiceSettings(helper.serviceInstance,
+        helper.makeBridgeInstance().setXUMLServiceSettings(helper.xUmlServiceInstance,
             changes,
             function(err, res) {
                 expect(err).toBeFalsy();
