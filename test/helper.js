@@ -2,12 +2,12 @@
 
 let E2EBridge = require('../index');
 
-const BRIDGE_HOST = "bridge.local";
-const BRIDGE_PORT = 8080;
-const BRIDGE_USER = "user";
-const BRIDGE_PW = "secret";
-const BRIDGE_NODE = "localhost";
-const SERVICE_INSTANCE = "TestService";
+const BRIDGE_HOST = process.env.BRIDGE_HOST || "bridge.local";
+const BRIDGE_PORT = (process.env.BRIDGE_PORT && parseInt(process.env.BRIDGE_PORT)) || 8080;
+const BRIDGE_USER = process.env.BRIDGE_USER || "user";
+const BRIDGE_PW = process.env.BRIDGE_PW || "secret";
+const BRIDGE_NODE = process.env.BRIDGE_NODE || "localhost";
+const SERVICE_INSTANCE = process.env.SERVICE_INSTANCE || "TestService";
 
 const BRIDGE_BASE = `https://${BRIDGE_HOST}:${BRIDGE_PORT}`;
 
@@ -31,4 +31,10 @@ module.exports = {
     makeBridgeInstance: function() {
         return new E2EBridge(BRIDGE_HOST, BRIDGE_PORT, BRIDGE_USER, BRIDGE_PW);
     },
+
+    skipIntegration: function() {
+        if(process.env.NOCK_OFF === 'true') {
+            pending("This integration test do not work (yet)");
+        }
+    }
 };

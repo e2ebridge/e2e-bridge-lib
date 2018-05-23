@@ -45,8 +45,19 @@ describe( "Preferences module", function() {
         return result;
     }
 
-    beforeEach(function() {
+    beforeEach(function(done) {
+
         scope = nock(helper.base);
+        if(process.env.NOCK_OFF === 'true') {
+            helper.makeBridgeInstance().setXUMLServicePreferences(helper.serviceInstance,
+                preferences,
+                function(/*err, res*/) {
+                    done();
+                }
+            );
+        } else {
+            done();
+        }
     });
 
     afterAll(function() {

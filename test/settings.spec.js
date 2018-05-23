@@ -60,6 +60,8 @@ describe( "Settings module", function() {
 
     it("can query", function(done){
 
+        helper.skipIntegration();
+
         scope.get(`${serviceUriPath}/settings`)
              .reply(200, {
                  "service": helper.serviceInstance,
@@ -78,6 +80,8 @@ describe( "Settings module", function() {
     });
 
     it("can change string value", function(done){
+
+        helper.skipIntegration();
 
         const changes = {"StringTestValue": "new value"};
         const settingsAfter = makeChangedSettings(settings, changes);
@@ -114,6 +118,8 @@ describe( "Settings module", function() {
 
     it("can change boolean value", function(done){
 
+        helper.skipIntegration();
+
         const changes = {"BooleanTestValue": "false"};
         const settingsAfter = makeChangedSettings(settings, changes);
 
@@ -149,6 +155,8 @@ describe( "Settings module", function() {
 
     it("can change integer value", function(done){
 
+        helper.skipIntegration();
+
         const changes = {"IntegerTestValue": "42"};
         const settingsAfter = makeChangedSettings(settings, changes);
 
@@ -183,6 +191,8 @@ describe( "Settings module", function() {
     });
 
     it("can change multiple values", function(done){
+
+        helper.skipIntegration();
 
         const changes = {
             "BooleanTestValue": "false",
