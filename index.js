@@ -258,99 +258,6 @@ Bridge.prototype._logInAndPerform = function( operation, callback){
 };
 
 /**
- * Remove service from bridge
- * @param {!string} serviceType 'xUML' or 'node'
- * @param {!string} name Name of the service.
- * @param {(string|function(?Object=))} node Name of the bridge node. If function type, will be used
- * instead of callback parameter. If null or function, will default to host.
- * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
- * @private
- */
-Bridge.prototype._removeService = function(serviceType, name, node, callback) {
-
-    var self = this;
-
-    if(typeof node === 'function') {
-        callback = node;
-        node = self._host;
-    }
-    if(!callback) {
-        callback = _defaultCallback;
-    }
-
-    var form = null;
-
-    var endpoint = '';
-    if(serviceType === XUML_SERVICE_TYPE) {
-        endpoint = XUML_SERVICE_REMOVE_ENDPOINT;
-        form = { "action_DELETE": "Delete xUML Service"};
-    } else if(serviceType === NODE_SERVICE_TYPE) {
-        endpoint = NODE_SERVICE_REMOVE_ENDPOINT;
-        form = { "action_DELETE": "Delete Node.js Service"};
-    } else if(serviceType === JAVA_SERVICE_TYPE) {
-        endpoint = JAVA_SERVICE_REMOVE_ENDPOINT;
-        form = { "action_DELETE": "Delete Java Service"};
-    } else {
-        // this is programming error, bail out immediately
-        throw new TypeError('"serviceType" is expected to be "node" or "xUML". Got "' + serviceType + '"');
-    }
-
-    _executeRequest(self._composeRequestObject( endpoint, { "node": node, "instance": name}), form, callback);
-};
-
-/**
- * Remove service from bridge
- * @param {!string} name Name of the service.
- * @param {!string} type 'xUML' or 'node'
- * @param {(string|function(?Object=))} node Name of the bridge node. If function type, will be used
- * instead of callback parameter. If null or function, will default to host.
- * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
- */
-Bridge.prototype.removeService = function(name, type, node, callback){
-    var self = this;
-
-    self._logInAndPerform(function(innerCallback) {
-        self._removeService(type, name, node, innerCallback);
-    }, callback);
-};
-
-/**
- * Removes xUML service from given node
- *
- * @param {!string} name Name of the service.
- * @param {(string|function(?Object=))} node Name of the bridge node. If function type, will be used
- * instead of callback parameter. If null or function, will default to host.
- * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
- */
-Bridge.prototype.removeXUMLService = function( name, node, callback) {
-    this.removeService(name, XUML_SERVICE_TYPE, node, callback);
-};
-
-/**
- * Removes Node.js service from given node
- *
- * @param {!string} name Name of the service.
- * @param {(string|function(?Object=))} node Name of the bridge node. If function type, will be used
- * instead of callback parameter. If null or function, will default to host.
- * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
- */
-Bridge.prototype.removeNodeService = function( name, node, callback) {
-    this.removeService(name, NODE_SERVICE_TYPE, node, callback);
-};
-
-/**
- * Removes Java service from given node
- *
- * @param {!string} name Name of the service.
- * @param {(string|function(?Object=))} node Name of the bridge node. If function type, will be used
- * instead of callback parameter. If null or function, will default to host.
- * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
- */
-Bridge.prototype.removeJavaService = function( name, node, callback) {
-    this.removeService(name, JAVA_SERVICE_TYPE, node, callback);
-};
-
-/**
  * Deploys service to the bridge
  * @param {(string|Buffer)} file The absolute file path to the repository (Node.js or xUML), a Buffer with repository content or the absolute directory path to pack and deploy.
  * @param {{startup: boolean, overwrite: boolean, overwrite_settings: boolean}} options Deployment options
@@ -839,6 +746,52 @@ Bridge.prototype.startJavaService = function( name, callback) {
  */
 Bridge.prototype.stopJavaService = function( name, callback) {
     this.setServiceStatus("stop", name, JAVA_SERVICE_TYPE, callback);
+};
+
+/**
+ * Remove service from the Bridge
+ * @param {!string} name Name of the service.
+ * @param {!string} serviceType 'xUML', 'node', or 'java'
+ * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ */
+Bridge.prototype.removeService = function(name, serviceType, callback){
+    let self = this;
+
+    _executeRestRequest(
+        self._composeRestRequestObject(
+            HTTP_DELETE,
+            endpoints.getEndpoint(serviceType, name, '', HTTP_DELETE)),
+        callback);
+};
+
+/**
+ * Removes xUML service from given node
+ *
+ * @param {!string} name Name of the service.
+ * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ */
+Bridge.prototype.removeXUMLService = function( name, callback) {
+    this.removeService(name, XUML_SERVICE_TYPE, callback);
+};
+
+/**
+ * Removes Node.js service from given node
+ *
+ * @param {!string} name Name of the service.
+ * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ */
+Bridge.prototype.removeNodeService = function( name, callback) {
+    this.removeService(name, NODE_SERVICE_TYPE, callback);
+};
+
+/**
+ * Removes Java service from given node
+ *
+ * @param {!string} name Name of the service.
+ * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ */
+Bridge.prototype.removeJavaService = function( name, callback) {
+    this.removeService(name, JAVA_SERVICE_TYPE, callback);
 };
 
 /**

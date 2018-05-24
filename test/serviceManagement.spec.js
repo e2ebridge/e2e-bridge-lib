@@ -56,6 +56,20 @@ describe( "Service type", function() {
                 done();
             });
         });
+
+        it("can be removed", function(done){
+
+            helper.skipIntegration();
+
+            scope.delete(endpoint(''))
+                .reply(200, undefined);
+
+            helper.makeBridgeInstance().removeXUMLService(helper.xUmlServiceInstance, function(err) {
+                expect(err).toBeFalsy();
+                scope.done();
+                done();
+            });
+        });
     });
 
     describe("'node'", function() {
@@ -80,6 +94,20 @@ describe( "Service type", function() {
                 .reply(200, undefined);
 
             helper.makeBridgeInstance().stopNodeService(helper.nodeJsServiceInstance, function(err) {
+                expect(err).toBeFalsy();
+                scope.done();
+                done();
+            });
+        });
+
+        it("can be removed", function(done){
+
+            helper.skipIntegration();
+
+            scope.delete(endpoint(''))
+                .reply(200, undefined);
+
+            helper.makeBridgeInstance().removeNodeService(helper.nodeJsServiceInstance, function(err) {
                 expect(err).toBeFalsy();
                 scope.done();
                 done();
@@ -115,6 +143,20 @@ describe( "Service type", function() {
                 .reply(200, undefined);
 
             helper.makeBridgeInstance().stopJavaService(helper.javaServiceInstance, function(err) {
+                expect(err).toBeFalsy();
+                scope.done();
+                done();
+            });
+        });
+
+        it("can be removed", function(done){
+
+            helper.skipIntegration();
+
+            scope.delete(endpoint(''))
+                .reply(200, undefined);
+
+            helper.makeBridgeInstance().removeJavaService(helper.javaServiceInstance, function(err) {
                 expect(err).toBeFalsy();
                 scope.done();
                 done();
