@@ -258,76 +258,6 @@ Bridge.prototype._logInAndPerform = function( operation, callback){
 };
 
 /**
- * Change service status.
- * Also start, stop or kill a service. Either node or xUML.
- *
- * @param {!string} change 'start', 'stop' or 'kill'. Note, that 'kill' will not work for node.js services
- * @param {!string} serviceType 'xUML' or 'node'
- * @param {!string} name Name of the service.
- * @param {(string|function(?Object=))} node Name of the bridge node. If function type, will be used
- * instead of callback parameter. If null or function, will default to host.
- * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
- * @private
- */
-Bridge.prototype._setServiceStatus = function( change, serviceType, name, node, callback) {
-
-    var self = this;
-
-    if(typeof node === 'function') {
-        callback = node;
-        node = self._host;
-    }
-    if(!callback) {
-        callback = _defaultCallback;
-    }
-
-    var form = null;
-    if(change === 'start'){
-        form = { "action_START": "Start" };
-    } else if(change === 'stop'){
-        form = { "action_STOP": "Stop" };
-    } else if(change === 'kill'){
-        form = { "action_KILL": "Kill" };
-    }
-
-    var endpoint = '';
-    if(serviceType === XUML_SERVICE_TYPE) {
-        endpoint = XUML_SERVICE_STATUS_ENDPOINT;
-    } else if(serviceType === NODE_SERVICE_TYPE) {
-        endpoint = NODE_SERVICE_STATUS_ENDPOINT;
-    } else if(serviceType === JAVA_SERVICE_TYPE) {
-        endpoint = JAVA_SERVICE_STATUS_ENDPOINT;
-    } else {
-        // this is programming error, bail out immediately
-        throw new TypeError('"serviceType" is expected to be "node" or "xUML". Got "' + serviceType + '"');
-    }
-
-    _executeRequest(self._composeRequestObject( endpoint, { "node": node, "instance": name}), form, callback);
-};
-
-/**
- * Start, stop or kill services.
- * @param {!string} status 'start', 'stop' or 'kill'. Note, that 'kill' will not work for node.js services
- * @param {!string} name Name of the service.
- * @param {!string} type 'xUML' or 'node'
- * @param {(string|function(?Object=))} node Name of the bridge node. If function type, will be used
- * instead of callback parameter. If null or function, will default to host.
- * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
- */
-Bridge.prototype.setServiceStatus = function(status, name, type, node, callback){
-    var self = this;
-
-    if(status !== 'start' && status !== 'stop' && status !== 'kill'){
-        // this is programming error, bail out immediately
-        throw new TypeError('"status" is expected to be "start", "stop" or "kill". Got "' + status + '"');
-    }
-
-    self._logInAndPerform(function(innerCallback) {
-        self._setServiceStatus(status, type, name, node, innerCallback);
-    }, callback);
-};
-
-/**
  * Remove service from bridge
  * @param {!string} serviceType 'xUML' or 'node'
  * @param {!string} name Name of the service.
@@ -385,42 +315,6 @@ Bridge.prototype.removeService = function(name, type, node, callback){
 };
 
 /**
- * Starts xUML service
- *
- * @param {!string} name Name of the service.
- * @param {(string|function(?Object=))} node Name of the bridge node. If function type, will be used
- * instead of callback parameter. If null or function, will default to host.
- * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
- */
-Bridge.prototype.startXUMLService = function( name, node, callback) {
-    this.setServiceStatus("start", name, XUML_SERVICE_TYPE, node, callback);
-};
-
-/**
- * Stops xUML service
- *
- * @param {!string} name Name of the service.
- * @param {(string|function(?Object=))} node Name of the bridge node. If function type, will be used
- * instead of callback parameter. If null or function, will default to host.
- * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
- */
-Bridge.prototype.stopXUMLService = function( name, node, callback) {
-    this.setServiceStatus("stop", name, XUML_SERVICE_TYPE, node, callback);
-};
-
-/**
- * Kills xUML service
- *
- * @param {!string} name Name of the service.
- * @param {(string|function(?Object=))} node Name of the bridge node. If function type, will be used
- * instead of callback parameter. If null or function, will default to host.
- * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
- */
-Bridge.prototype.killXUMLService = function( name, node, callback) {
-    this.setServiceStatus("kill", name, XUML_SERVICE_TYPE, node, callback);
-};
-
-/**
  * Removes xUML service from given node
  *
  * @param {!string} name Name of the service.
@@ -433,30 +327,6 @@ Bridge.prototype.removeXUMLService = function( name, node, callback) {
 };
 
 /**
- * Starts Node.js service
- *
- * @param {!string} name Name of the service.
- * @param {(string|function(?Object=))} node Name of the bridge node. If function type, will be used
- * instead of callback parameter. If null or function, will default to host.
- * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
- */
-Bridge.prototype.startNodeService = function( name, node, callback) {
-    this.setServiceStatus("start", name, NODE_SERVICE_TYPE, node, callback);
-};
-
-/**
- * Stops Node.js service
- *
- * @param {!string} name Name of the service.
- * @param {(string|function(?Object=))} node Name of the bridge node. If function type, will be used
- * instead of callback parameter. If null or function, will default to host.
- * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
- */
-Bridge.prototype.stopNodeService = function( name, node, callback) {
-    this.setServiceStatus("stop", name, NODE_SERVICE_TYPE, node, callback);
-};
-
-/**
  * Removes Node.js service from given node
  *
  * @param {!string} name Name of the service.
@@ -466,30 +336,6 @@ Bridge.prototype.stopNodeService = function( name, node, callback) {
  */
 Bridge.prototype.removeNodeService = function( name, node, callback) {
     this.removeService(name, NODE_SERVICE_TYPE, node, callback);
-};
-
-/**
- * Starts Java service
- *
- * @param {!string} name Name of the service.
- * @param {(string|function(?Object=))} node Name of the bridge node. If function type, will be used
- * instead of callback parameter. If null or function, will default to host.
- * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
- */
-Bridge.prototype.startJavaService = function( name, node, callback) {
-    this.setServiceStatus("start", name, JAVA_SERVICE_TYPE, node, callback);
-};
-
-/**
- * Stops Java service
- *
- * @param {!string} name Name of the service.
- * @param {(string|function(?Object=))} node Name of the bridge node. If function type, will be used
- * instead of callback parameter. If null or function, will default to host.
- * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
- */
-Bridge.prototype.stopJavaService = function( name, node, callback) {
-    this.setServiceStatus("stop", name, JAVA_SERVICE_TYPE, node, callback);
 };
 
 /**
@@ -906,6 +752,93 @@ Bridge.prototype._composeRestRequestObject = function(method, endpoint, content,
     }
 
     return ret;
+};
+
+/**
+ * Start, stop or kill services.
+ * @param {!string} status 'start', 'stop' or 'kill'. Note, that 'kill' will not work for node.js services
+ * @param {!string} name Name of the service.
+ * @param {!string} serviceType 'xUML', 'node', or 'java'
+ * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ */
+Bridge.prototype.setServiceStatus = function(status, name, serviceType, callback){
+    let self = this;
+
+    _executeRestRequest(
+        self._composeRestRequestObject(
+            HTTP_PUT,
+            endpoints.getEndpoint(serviceType, name, status, HTTP_PUT)),
+        callback);
+};
+
+/**
+ * Starts xUML service
+ *
+ * @param {!string} name Name of the service.
+ * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ */
+Bridge.prototype.startXUMLService = function( name, callback) {
+    this.setServiceStatus("start", name, XUML_SERVICE_TYPE, callback);
+};
+
+/**
+ * Stops xUML service
+ *
+ * @param {!string} name Name of the service.
+ * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ */
+Bridge.prototype.stopXUMLService = function( name, callback) {
+    this.setServiceStatus("stop", name, XUML_SERVICE_TYPE, callback);
+};
+
+/**
+ * Kills xUML service
+ *
+ * @param {!string} name Name of the service.
+ * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ */
+Bridge.prototype.killXUMLService = function( name, callback) {
+    this.setServiceStatus("kill", name, XUML_SERVICE_TYPE, callback);
+};
+
+/**
+ * Starts Node.js service
+ *
+ * @param {!string} name Name of the service.
+ * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ */
+Bridge.prototype.startNodeService = function( name, callback) {
+    this.setServiceStatus("start", name, NODE_SERVICE_TYPE, callback);
+};
+
+/**
+ * Stops Node.js service
+ *
+ * @param {!string} name Name of the service.
+ * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ */
+Bridge.prototype.stopNodeService = function( name, callback) {
+    this.setServiceStatus("stop", name, NODE_SERVICE_TYPE, callback);
+};
+
+/**
+ * Starts Java service
+ *
+ * @param {!string} name Name of the service.
+ * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ */
+Bridge.prototype.startJavaService = function( name, callback) {
+    this.setServiceStatus("start", name, JAVA_SERVICE_TYPE, callback);
+};
+
+/**
+ * Stops Java service
+ *
+ * @param {!string} name Name of the service.
+ * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ */
+Bridge.prototype.stopJavaService = function( name, callback) {
+    this.setServiceStatus("stop", name, JAVA_SERVICE_TYPE, callback);
 };
 
 /**
