@@ -16,8 +16,7 @@
     "request": "^2.87.0",
     "temp": "^0.8.0",
     "tmp": "^0.0.33",
-    "unzip": "^0.1.9",
-    "xml2js": "^0.4.4"
+    "unzip": "^0.1.9"
   },
   "devDependencies": {
     "cross-env": "^5.1.5",

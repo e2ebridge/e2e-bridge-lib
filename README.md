@@ -16,13 +16,6 @@ Node.js library allowing interaction with E2E Bridge.
     * kill
 * Node.js Services only
     * pack
-* E2E Bridge
-    * Users
-        * create
-        * delete
-    * User groups
-        * create
-        * delete
 
 ## Installation
 ``` bash
