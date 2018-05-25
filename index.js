@@ -674,7 +674,7 @@ Bridge.prototype.setServiceStatus = function(status, name, serviceType, callback
     _executeRestRequest(
         self._composeRestRequestObject(
             HTTP_PUT,
-            endpoints.getEndpoint(serviceType, name, status, HTTP_PUT)),
+            endpoints.getServiceEndpoint(HTTP_PUT, serviceType, name, status)),
         callback);
 };
 
@@ -760,7 +760,7 @@ Bridge.prototype.removeService = function(name, serviceType, callback){
     _executeRestRequest(
         self._composeRestRequestObject(
             HTTP_DELETE,
-            endpoints.getEndpoint(serviceType, name, '', HTTP_DELETE)),
+            endpoints.getServiceEndpoint(HTTP_DELETE, serviceType, name)),
         callback);
 };
 
@@ -806,7 +806,7 @@ Bridge.prototype.getServicePreferences = function(name, serviceType, callback) {
     _executeRestRequest(
         self._composeRestRequestObject(
             HTTP_GET,
-            endpoints.getEndpoint(serviceType, name, 'preferences', HTTP_GET)),
+            endpoints.getServiceEndpoint(HTTP_GET, serviceType, name, 'preferences')),
         callback);
 };
 
@@ -852,7 +852,7 @@ Bridge.prototype.getServiceSettings = function(name, serviceType, callback) {
     _executeRestRequest(
         self._composeRestRequestObject(
             HTTP_GET,
-            endpoints.getEndpoint(serviceType, name, 'settings', HTTP_GET)),
+            endpoints.getServiceEndpoint(HTTP_GET, serviceType, name, 'settings')),
         callback);
 };
 
@@ -921,7 +921,7 @@ Bridge.prototype.setServicePreferences = function(name, serviceType, preferences
         _executeRestRequest(
             self._composeRestRequestObject(
                 HTTP_PUT,
-                endpoints.getEndpoint(serviceType, name, 'preferences', HTTP_PUT),
+                endpoints.getServiceEndpoint(HTTP_PUT, serviceType, name, 'preferences'),
                 newPreferences),
             function(error, response) {
                 if(!error && !response) {
@@ -934,7 +934,7 @@ Bridge.prototype.setServicePreferences = function(name, serviceType, preferences
     _executeRestRequest(
         self._composeRestRequestObject(
             HTTP_GET,
-            endpoints.getEndpoint(serviceType, name, 'preferences', HTTP_GET)),
+            endpoints.getServiceEndpoint(HTTP_GET, serviceType, name, 'preferences')),
         getCallback);
 };
 
@@ -1004,14 +1004,14 @@ Bridge.prototype.setServiceSettings = function(name, serviceType, settings, call
         _executeRestRequest(
             self._composeRestRequestObject(
                 HTTP_PUT,
-                endpoints.getEndpoint(serviceType, name, 'settings', HTTP_PUT),
+                endpoints.getServiceEndpoint(HTTP_PUT, serviceType, name, 'settings'),
                 newSettings),
             function(error, response) {
                 if(!error && !response) {
                     _executeRestRequest(
                         self._composeRestRequestObject(
                             HTTP_GET,
-                            endpoints.getEndpoint(serviceType, name, 'settings', HTTP_GET)),
+                            endpoints.getServiceEndpoint(HTTP_GET, serviceType, name, 'settings')),
                         callback);
                 } else {
                     callback(error, response);
@@ -1022,7 +1022,7 @@ Bridge.prototype.setServiceSettings = function(name, serviceType, settings, call
     _executeRestRequest(
         self._composeRestRequestObject(
             HTTP_GET,
-            endpoints.getEndpoint(serviceType, name, 'settings', HTTP_GET)),
+            endpoints.getServiceEndpoint(HTTP_GET, serviceType, name, 'settings')),
         getCallback);
 };
 
