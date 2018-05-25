@@ -6,27 +6,27 @@
 /*global define require */
 "use strict";
 
-var request = require('request');
-var fs = require('fs');
-var path = require('path');
+const request = require('request');
+const fs = require('fs');
+const path = require('path');
 const tmp = require('tmp');
 
-var repository = require('./lib/repository');
-var endpoints = require('./lib/endpoints');
+const repository = require('./lib/repository');
+const endpoints = require('./lib/endpoints');
 
-/** @const */ var BRIDGE_REST_API_BASE = '/bridge/rest';
-/** @const */ var XUML_SERVICE_TYPE = 'xUML';
-/** @const */ var NODE_SERVICE_TYPE = 'node';
-/** @const */ var JAVA_SERVICE_TYPE = 'java';
+const BRIDGE_REST_API_BASE = '/bridge/rest';
+const XUML_SERVICE_TYPE = 'xUML';
+const NODE_SERVICE_TYPE = 'node';
+const JAVA_SERVICE_TYPE = 'java';
 
+const HTTP_DELETE = 'DELETE';
+const HTTP_GET = 'GET';
+const HTTP_HEAD = 'HEAD';
+const HTTP_OPTIONS = 'OPTIONS';
+const HTTP_PATCH = 'PATCH';
+const HTTP_POST = 'POST';
+const HTTP_PUT = 'PUT';
 
-/** @const */ var HTTP_DELETE  = 'DELETE';
-/** @const */ var HTTP_GET     = 'GET';
-/** @const */ var HTTP_HEAD    = 'HEAD';
-/** @const */ var HTTP_OPTIONS = 'OPTIONS';
-/** @const */ var HTTP_PATCH   = 'PATCH';
-/** @const */ var HTTP_POST    = 'POST';
-/** @const */ var HTTP_PUT     = 'PUT';
 // TRACE & CONNECT are N/A
 
 /**
@@ -47,7 +47,7 @@ function Bridge(host, port, user, password) {
 /**
  * Pack a directory
  * @param {(string)} directory The absolute directory path.
- * @param {string|{output: string}} options Packing options
+ * @param {string|{output: string}|function(?Object=)} options Packing options or the callback.
  * @param {function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
  */
 function pack( directory, options, callback) {
@@ -92,7 +92,7 @@ function pack( directory, options, callback) {
  * @returns {string} the repository file name
  */
 function archiveName(directory) {
-    var pkg = require('package')(directory);
+    const pkg = require('package')(directory);
     if (pkg && pkg.name && pkg.version) {
         return pkg.name + '-' + pkg.version + '.zip';
     } else {
