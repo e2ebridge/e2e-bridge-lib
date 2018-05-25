@@ -258,124 +258,6 @@ Bridge.prototype._logInAndPerform = function( operation, callback){
 };
 
 /**
- * Deploys service to the bridge
- * @param {(string|Buffer)} file The absolute file path to the repository (Node.js or xUML), a Buffer with repository content or the absolute directory path to pack and deploy.
- * @param {{startup: boolean, overwrite: boolean, overwrite_settings: boolean}} options Deployment options
- * @param {function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
- */
-Bridge.prototype.deployService = function( file, options, callback) {
-
-    var self = this;
-
-    if( typeof options === 'function'){
-        callback = options;
-        options = {};
-    }
-
-    if( Buffer.isBuffer(file)){
-        self._logInAndPerform(function(innerCallback) {
-            self._deployService('repository.zip', file, options, innerCallback);
-        }, callback);
-    } else {
-        fs.stat(file, function(err, stat){
-            var repositoryPath;
-            if (err) {
-                return callback({ errorType: "Filesystem error", error: err});
-            }
-
-            if(stat.isDirectory()){
-                repositoryPath = tmp.fileSync({prefix: archiveName(file)}).name;
-
-                pack(file, {output: repositoryPath}, function(err){
-                    if (err) {
-                        return callback({ errorType: "Pack error", error: err});
-                    }
-
-                    file = repositoryPath;
-
-                    fs.readFile(file, function (err, data) {
-                        if (err) {
-                            return callback({ errorType: "Filesystem error", error: err});
-                        }
-
-                        self._logInAndPerform(function (innerCallback) {
-                            self._deployService(path.basename(file), data, options, innerCallback);
-                        }, function(err){
-                            fs.unlink(file,function(){
-                                callback(err);
-                            });
-                        });
-                    });
-
-                });
-            } else {
-                fs.readFile(file, function (err, data) {
-                    if (err) {
-                        return callback({ errorType: "Filesystem error", error: err});
-                    }
-
-                    self._logInAndPerform(function (innerCallback) {
-                        self._deployService(path.basename(file), data, options, innerCallback);
-                    }, callback);
-                });
-            }
-        });
-    }
-};
-
-/**
- * Does the real deployment work.
- *
- * @param {string} filename The name of the file we're uploading
- * @param {Buffer} data     Content of the file.
- * @param {{startup: boolean, overwrite: boolean, overwrite_settings: boolean}} options  Options regarding startup,
- * overwriting and settings overwriting.
- * @param {function(?Object=)} callback  Called when done. If everything goes smoothly, parameter will be null.
- * @private
- */
-Bridge.prototype._deployService = function(filename, data, options, callback) {
-
-    var self = this;
-
-    if( !Buffer.isBuffer( data)){
-        throw new TypeError('Data is expected to be a Buffer, "' + (typeof data) + '" given');
-    }
-
-    var form = {
-        $isUpload: true,
-        input_repository: {
-            value: data,
-            fieldOptions: {
-                filename: filename,
-                contentType: REPOSITORY_CONTENT_TYPE
-            }
-        },
-        action_UPLOAD: 'UPLOAD'
-    };
-
-    if( options.startup){
-        form.input_startup = 'true';
-    }
-    if( options.overwrite){
-        form.input_overwrite = 'true';
-    }
-    if( options.overwrite_settings){
-        form.input_overwrite_settings = 'true';
-    }
-    if( options.npm_install){
-        form.input_run_npm_install = 'true';
-    }
-    if( options.npm_install_run_scripts){
-        form.input_npm_install_run_scripts = 'true';
-    }
-    if( options.instance_name){
-        form.input_instance_name = options.instance_name;
-    }
-
-    _executeRequest(self._composeRequestObject( FIRMWARE_DEPLOY_ENDPOINT), form, callback);
-};
-
-/**
  * Create group
  * @param {{input_group_id: string, input_group_name: string, input_role: string}} options group options
  * @param {function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
@@ -659,6 +541,70 @@ Bridge.prototype._composeRestRequestObject = function(method, endpoint, content,
     }
 
     return ret;
+};
+
+/**
+ * Deploys service to the bridge
+ * @param {(string|Buffer)} file The absolute file path to the repository (Node.js or xUML), a Buffer with repository content or the absolute directory path to pack and deploy.
+ * @param {{startup: boolean, overwrite: boolean, overwritePrefs: boolean, npmInstall: boolean, runScripts: boolean, instanceName: string}|function(?Object=)} options Deployment options
+ * @param {function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ */
+Bridge.prototype.deployService = function( file, options, callback) {
+
+    let self = this;
+
+    if( !callback && typeof options === 'function'){
+        callback = options;
+        options = null;
+    }
+
+    const requestObject = self._composeRestRequestObject(
+        HTTP_POST,
+        endpoints.getServicesEndpoint(HTTP_POST)
+    );
+
+    requestObject.qs = options;
+
+    if( Buffer.isBuffer(file)){
+        requestObject.formData = {
+            uploadFile: {
+                value: file,
+                options: {
+                    filename: 'repository.zip'
+                }
+            }
+        };
+        _executeRestRequest(requestObject, callback);
+    } else {
+        fs.stat(file, function(err, stat){
+            if (err) {
+                return callback({ errorType: "Filesystem error", error: err});
+            }
+
+            if(stat.isDirectory()){
+                let repositoryPath = tmp.fileSync({prefix: archiveName(file)}).name;
+
+                pack(file, {output: repositoryPath}, function(err){
+                    if (err) {
+                        return callback({ errorType: "Pack error", error: err});
+                    }
+
+                    file = repositoryPath;
+
+                    requestObject.formData = { uploadFile: fs.createReadStream(file) };
+                    _executeRestRequest(requestObject, function(err){
+                        fs.unlink(file,function(){
+                            callback(err);
+                        });
+                    });
+
+                });
+            } else {
+                requestObject.formData = { uploadFile: fs.createReadStream(file) };
+                _executeRestRequest(requestObject, callback);
+            }
+        });
+    }
 };
 
 /**
