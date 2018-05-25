@@ -13,11 +13,11 @@
     "inherits": "2",
     "npm": "3.x",
     "package": "^1.0.1",
-    "request": "2.34.x",
+    "request": "^2.87.0",
     "temp": "^0.8.0",
+    "tmp": "^0.0.33",
     "unzip": "^0.1.9",
-    "xml2js": "^0.4.4",
-    "tmp": "^0.0.33"
+    "xml2js": "^0.4.4"
   },
   "devDependencies": {
     "cross-env": "^5.1.5",
