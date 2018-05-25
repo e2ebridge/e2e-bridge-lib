@@ -111,7 +111,7 @@ function archiveName(directory) {
  * Default callback for REST Bridge API
  * @type {bridgeApiCallback}
  */
-function _defaultRestCallback(err, response) {
+function _defaultCallback(err, response) {
     if(err) {
         console.error(err);
     } else if(response){
@@ -142,10 +142,10 @@ function _cleanResponse(next, error, response) {
  * @param {bridgeApiCallback=} callback Function to call upon completion.
  * @private
  */
-function _executeRestRequest(options, callback) {
+function _executeRequest(options, callback) {
 
     if(!callback) {
-        callback = _defaultRestCallback;
+        callback = _defaultCallback;
     } else {
         callback = _cleanResponse.bind(null, callback);
     }
@@ -171,7 +171,7 @@ function _executeRestRequest(options, callback) {
  * @returns {Object}
  * @private
  */
-Bridge.prototype._composeRestRequestObject = function(method, endpoint, content, getParams) {
+Bridge.prototype._composeRequestObject = function(method, endpoint, content, getParams) {
 
     let self = this;
 
@@ -214,7 +214,7 @@ Bridge.prototype.deployService = function( file, options, callback) {
         options = null;
     }
 
-    const requestObject = self._composeRestRequestObject(
+    const requestObject = self._composeRequestObject(
         HTTP_POST,
         endpoints.getServicesEndpoint(HTTP_POST)
     );
@@ -230,7 +230,7 @@ Bridge.prototype.deployService = function( file, options, callback) {
                 }
             }
         };
-        _executeRestRequest(requestObject, callback);
+        _executeRequest(requestObject, callback);
     } else {
         fs.stat(file, function(err, stat){
             if (err) {
@@ -248,7 +248,7 @@ Bridge.prototype.deployService = function( file, options, callback) {
                     file = repositoryPath;
 
                     requestObject.formData = { uploadFile: fs.createReadStream(file) };
-                    _executeRestRequest(requestObject, function(err){
+                    _executeRequest(requestObject, function(err){
                         fs.unlink(file,function(){
                             callback(err);
                         });
@@ -257,7 +257,7 @@ Bridge.prototype.deployService = function( file, options, callback) {
                 });
             } else {
                 requestObject.formData = { uploadFile: fs.createReadStream(file) };
-                _executeRestRequest(requestObject, callback);
+                _executeRequest(requestObject, callback);
             }
         });
     }
@@ -273,8 +273,8 @@ Bridge.prototype.deployService = function( file, options, callback) {
 Bridge.prototype.setServiceStatus = function(status, name, serviceType, callback){
     let self = this;
 
-    _executeRestRequest(
-        self._composeRestRequestObject(
+    _executeRequest(
+        self._composeRequestObject(
             HTTP_PUT,
             endpoints.getServiceEndpoint(HTTP_PUT, serviceType, name, status)),
         callback);
@@ -359,8 +359,8 @@ Bridge.prototype.stopJavaService = function( name, callback) {
 Bridge.prototype.removeService = function(name, serviceType, callback){
     let self = this;
 
-    _executeRestRequest(
-        self._composeRestRequestObject(
+    _executeRequest(
+        self._composeRequestObject(
             HTTP_DELETE,
             endpoints.getServiceEndpoint(HTTP_DELETE, serviceType, name)),
         callback);
@@ -405,8 +405,8 @@ Bridge.prototype.removeJavaService = function( name, callback) {
 Bridge.prototype.getServicePreferences = function(name, serviceType, callback) {
     let self = this;
 
-    _executeRestRequest(
-        self._composeRestRequestObject(
+    _executeRequest(
+        self._composeRequestObject(
             HTTP_GET,
             endpoints.getServiceEndpoint(HTTP_GET, serviceType, name, 'preferences')),
         callback);
@@ -451,8 +451,8 @@ Bridge.prototype.getJavaServicePreferences = function(name, callback) {
 Bridge.prototype.getServiceSettings = function(name, serviceType, callback) {
     let self = this;
 
-    _executeRestRequest(
-        self._composeRestRequestObject(
+    _executeRequest(
+        self._composeRequestObject(
             HTTP_GET,
             endpoints.getServiceEndpoint(HTTP_GET, serviceType, name, 'settings')),
         callback);
@@ -520,8 +520,8 @@ Bridge.prototype.setServicePreferences = function(name, serviceType, preferences
         }
 
         let newPreferences = Object.assign({}, currentPreferences, preferences);
-        _executeRestRequest(
-            self._composeRestRequestObject(
+        _executeRequest(
+            self._composeRequestObject(
                 HTTP_PUT,
                 endpoints.getServiceEndpoint(HTTP_PUT, serviceType, name, 'preferences'),
                 newPreferences),
@@ -533,8 +533,8 @@ Bridge.prototype.setServicePreferences = function(name, serviceType, preferences
             });
     };
 
-    _executeRestRequest(
-        self._composeRestRequestObject(
+    _executeRequest(
+        self._composeRequestObject(
             HTTP_GET,
             endpoints.getServiceEndpoint(HTTP_GET, serviceType, name, 'preferences')),
         getCallback);
@@ -603,15 +603,15 @@ Bridge.prototype.setServiceSettings = function(name, serviceType, settings, call
             return;
         }
 
-        _executeRestRequest(
-            self._composeRestRequestObject(
+        _executeRequest(
+            self._composeRequestObject(
                 HTTP_PUT,
                 endpoints.getServiceEndpoint(HTTP_PUT, serviceType, name, 'settings'),
                 newSettings),
             function(error, response) {
                 if(!error && !response) {
-                    _executeRestRequest(
-                        self._composeRestRequestObject(
+                    _executeRequest(
+                        self._composeRequestObject(
                             HTTP_GET,
                             endpoints.getServiceEndpoint(HTTP_GET, serviceType, name, 'settings')),
                         callback);
@@ -621,8 +621,8 @@ Bridge.prototype.setServiceSettings = function(name, serviceType, settings, call
             });
     };
 
-    _executeRestRequest(
-        self._composeRestRequestObject(
+    _executeRequest(
+        self._composeRequestObject(
             HTTP_GET,
             endpoints.getServiceEndpoint(HTTP_GET, serviceType, name, 'settings')),
         getCallback);
