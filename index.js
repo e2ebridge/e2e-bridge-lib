@@ -152,7 +152,7 @@ function _executeRequest(options, callback) {
 
     request(options,
         function(error, response, body) {
-            if (!error && response.statusCode == 200) {
+            if (!error && response.statusCode === 200) {
                 callback(null, body)
             } else if(!error){
                 callback({ errorType: "Bridge error", error: body});
