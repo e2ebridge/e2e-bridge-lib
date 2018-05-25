@@ -1,7 +1,7 @@
 let helper = require('./helper');
 let nock = require('nock');
 
-describe( "Service", function() {
+describe( "Services", function() {
     let scope;
     function serviceUriPath(serviceType, serviceName, tail) {
         return `/bridge/rest/services/${serviceType}/${serviceName}${tail}`;
@@ -110,6 +110,32 @@ describe( "Service", function() {
 
                 helper.makeBridgeInstance().removeNodeService(helper.nodeJsServiceInstance, function (err) {
                     expect(err).toBeFalsy();
+                    scope.done();
+                    done();
+                });
+            });
+
+            it("can be listed", function (done) {
+
+                helper.skipIntegration();
+
+                const response = {
+                    "service": [
+                        {
+                            "name": helper.nodeJsServiceInstance,
+                            "type": "NodeJs",
+                            "status": "Stopped",
+                            "href": endpoint('')
+                        }
+                    ]
+                };
+
+                scope.get('/bridge/rest/services/nodejs')
+                    .reply(200, response);
+
+                helper.makeBridgeInstance().listNodeServices(function (err, services) {
+                    expect(err).toBeFalsy();
+                    expect(services).toEqual(response);
                     scope.done();
                     done();
                 });

@@ -130,7 +130,9 @@ function _defaultCallback(err, response) {
  */
 function _cleanResponse(next, error, response) {
     if(response) {
-        delete response.service;
+        if(!Array.isArray(response.service)) {
+            delete response.service;
+        }
         delete response.link;
     }
     return next(error, response);
@@ -261,6 +263,60 @@ Bridge.prototype.deployService = function( file, options, callback) {
             }
         });
     }
+};
+
+
+/**
+ * List deployed services of given type or all.
+ * @param {?string} serviceType 'xUML', 'node', or 'java'. If null, all services will be listed.
+ * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ */
+Bridge.prototype.listServices = function(serviceType, callback){
+    let self = this;
+
+    _executeRequest(
+        self._composeRequestObject(
+            HTTP_GET,
+            serviceType ?
+                endpoints.getServiceEndpoint(HTTP_GET, serviceType) :
+                endpoints.getServicesEndpoint(HTTP_GET)),
+        callback);
+};
+
+/**
+ * List all deployed services.
+ * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ */
+Bridge.prototype.listAllServices = function(callback){
+    let self = this;
+    return self.listServices(null, callback);
+};
+
+/**
+ * List deployed xUML services.
+ * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ */
+Bridge.prototype.listXUMLServices = function(callback){
+    let self = this;
+    return self.listServices(XUML_SERVICE_TYPE, callback);
+};
+
+/**
+ * List deployed Node.js services.
+ * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ */
+Bridge.prototype.listNodeServices = function(callback){
+    let self = this;
+    return self.listServices(NODE_SERVICE_TYPE, callback);
+};
+
+/**
+ * List deployed java services.
+ * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ */
+Bridge.prototype.listJavaServices = function(callback){
+    let self = this;
+    return self.listServices(JAVA_SERVICE_TYPE, callback);
 };
 
 /**
