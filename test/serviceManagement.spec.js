@@ -71,6 +71,25 @@ describe( "Services", function() {
                     done();
                 });
             });
+
+            it("can get status", function (done) {
+
+                const response = {
+                    name: helper.xUmlServiceInstance,
+                    type: 'xUML',
+                    status: 'Stopped'
+                };
+
+                scope.get(endpoint(''))
+                    .reply(200, response);
+
+                helper.makeBridgeInstance().getXUMLServiceStatus(helper.xUmlServiceInstance, function (err, res) {
+                    expect(err).toBeFalsy();
+                    expect(res).toEqual(response);
+                    scope.done();
+                    done();
+                });
+            });
         });
 
         describe("'node'", function () {
@@ -140,6 +159,25 @@ describe( "Services", function() {
                     done();
                 });
             });
+
+            it("can get status", function (done) {
+
+                const response = {
+                    name: helper.nodeJsServiceInstance,
+                    type: 'NodeJs',
+                    status: 'Stopped'
+                };
+
+                scope.get(endpoint(''))
+                    .reply(200, response);
+
+                helper.makeBridgeInstance().getNodeServiceStatus(helper.nodeJsServiceInstance, function (err, res) {
+                    expect(err).toBeFalsy();
+                    expect(res).toEqual(response);
+                    scope.done();
+                    done();
+                });
+            });
         });
 
         describe("'java'", function () {
@@ -185,6 +223,27 @@ describe( "Services", function() {
 
                 helper.makeBridgeInstance().removeJavaService(helper.javaServiceInstance, function (err) {
                     expect(err).toBeFalsy();
+                    scope.done();
+                    done();
+                });
+            });
+
+            it("can get status", function (done) {
+
+                helper.skipIntegration();
+
+                const response = {
+                    name: helper.javaServiceInstance,
+                    type: 'Java',
+                    status: 'Stopped'
+                };
+
+                scope.get(endpoint(''))
+                    .reply(200, response);
+
+                helper.makeBridgeInstance().getJavaServiceStatus(helper.javaServiceInstance, function (err, res) {
+                    expect(err).toBeFalsy();
+                    expect(res).toEqual(response);
                     scope.done();
                     done();
                 });

@@ -7,6 +7,7 @@ Node.js library allowing interaction with E2E Bridge.
 * xUML, Node.js, and Java Services
     * deploy
     * list all services / all services of given type
+    * query status
     * remove
     * start
     * stop

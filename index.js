@@ -407,6 +407,49 @@ Bridge.prototype.stopJavaService = function( name, callback) {
 };
 
 /**
+ * Queries the status of a service
+ * @param {!string} name Name of the service.
+ * @param {!string} serviceType 'xUML', 'node', or 'java'
+ * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ */
+Bridge.prototype.getServiceStatus = function(name, serviceType, callback){
+    let self = this;
+
+    _executeRequest(
+        self._composeRequestObject(
+            HTTP_GET,
+            endpoints.getServiceEndpoint(HTTP_GET, serviceType, name)),
+        callback);
+};
+
+/**
+ * Queries the status of a xUML service
+ * @param {!string} name Name of the service.
+ * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ */
+Bridge.prototype.getXUMLServiceStatus = function(name, callback){
+    this.getServiceStatus(name, XUML_SERVICE_TYPE, callback);
+};
+
+/**
+ * Queries the status of a Node.js service
+ * @param {!string} name Name of the service.
+ * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ */
+Bridge.prototype.getNodeServiceStatus = function(name, callback){
+    this.getServiceStatus(name, NODE_SERVICE_TYPE, callback);
+};
+
+/**
+ * Queries the status of a Java service
+ * @param {!string} name Name of the service.
+ * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ */
+Bridge.prototype.getJavaServiceStatus = function(name, callback){
+    this.getServiceStatus(name, JAVA_SERVICE_TYPE, callback);
+};
+
+/**
  * Remove service from the Bridge
  * @param {!string} name Name of the service.
  * @param {!string} serviceType 'xUML', 'node', or 'java'
