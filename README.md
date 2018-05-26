@@ -17,6 +17,7 @@ Node.js library allowing interaction with E2E Bridge.
 * xUML Services only
     * extended information
     * kill
+    * list model notes
 * Node.js Services only
     * pack
 

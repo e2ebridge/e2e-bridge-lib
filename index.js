@@ -465,6 +465,21 @@ Bridge.prototype.getXUMLServiceInfo = function(name, callback){
 };
 
 /**
+ * Get list of available model notes for the given xUML service
+ * @param {!string} name Name of the service.
+ * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ */
+Bridge.prototype.getXUMLModelNotesList = function(name, callback){
+    let self = this;
+
+    _executeRequest(
+        self._composeRequestObject(
+            HTTP_GET,
+            endpoints.getServiceEndpoint(HTTP_GET, XUML_SERVICE_TYPE, name, 'modelnotes')),
+        callback);
+};
+
+/**
  * Remove service from the Bridge
  * @param {!string} name Name of the service.
  * @param {!string} serviceType 'xUML', 'node', or 'java'
