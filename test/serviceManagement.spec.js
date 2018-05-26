@@ -90,6 +90,29 @@ describe( "Services", function() {
                     done();
                 });
             });
+
+            it("can get extended information", function (done) {
+
+                const response = {
+                    "restInfo": [],
+                    "soapInfo": [],
+                    "category": "RTREST",
+                    "serviceUrl": `${helper.base}/admin/Console/BridgeInstanceConfiguration?node=${helper.host}&instance=${helper.xUmlServiceInstance}`
+                };
+
+                scope.get(endpoint('/info'))
+                    .reply(200, response);
+
+                helper.makeBridgeInstance().getXUMLServiceInfo(helper.xUmlServiceInstance, function (err, res) {
+                    expect(err).toBeFalsy();
+                    expect(res.restInfo).toBeDefined();
+                    expect(res.soapInfo).toBeDefined();
+                    expect(res.category).toBeDefined();
+                    expect(res.serviceUrl).toBeDefined();
+                    scope.done();
+                    done();
+                });
+            });
         });
 
         describe("'node'", function () {

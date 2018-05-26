@@ -450,6 +450,21 @@ Bridge.prototype.getJavaServiceStatus = function(name, callback){
 };
 
 /**
+ * Get extended information about a xUML service
+ * @param {!string} name Name of the service.
+ * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ */
+Bridge.prototype.getXUMLServiceInfo = function(name, callback){
+    let self = this;
+
+    _executeRequest(
+        self._composeRequestObject(
+            HTTP_GET,
+            endpoints.getServiceEndpoint(HTTP_GET, XUML_SERVICE_TYPE, name, 'info')),
+        callback);
+};
+
+/**
  * Remove service from the Bridge
  * @param {!string} name Name of the service.
  * @param {!string} serviceType 'xUML', 'node', or 'java'
