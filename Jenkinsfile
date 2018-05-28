@@ -22,7 +22,7 @@ pipeline {
 		}
 		stage('test') {
 			steps {
-				sh 'npm test -- --junitreport --filePrefix=unit-test-results'
+				sh 'npm test -- --junitreport --filePrefix=unit-test-results || true'
 				junit 'unit-test-results.xml'
 			}
 		}
