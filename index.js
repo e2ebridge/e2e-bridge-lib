@@ -915,6 +915,49 @@ Bridge.prototype.setJavaServiceSettings = function(name, settings, callback) {
     self.setServiceSettings(name, JAVA_SERVICE_TYPE, settings, callback);
 };
 
-module.exports = Bridge;
+/**
+ * List resources of the given type.
+ * @param {!string} type Valid resource type: 'resource', 'java', 'xslt'.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
+ */
+Bridge.prototype.listXUMLResources = function(type, callback) {
+    let self = this;
 
+    _executeRequest(
+        self._composeRequestObject(
+            HTTP_GET,
+            endpoints.getXUMLResourcesEndpoint(HTTP_GET, type)),
+        callback);
+};
+
+/**
+ * List resources of the 'resource' type.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
+ */
+Bridge.prototype.listXUMLResourceResources = function(callback) {
+    let self = this;
+    self.listXUMLResources('resource', callback);
+};
+
+/**
+ * List resources of the 'java' type.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
+ */
+Bridge.prototype.listXUMLJavaResources = function(callback) {
+    let self = this;
+    self.listXUMLResources('java', callback);
+};
+
+/**
+ * List resources of the 'xslt' type.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
+ */
+Bridge.prototype.listXUMLXsltResources = function(callback) {
+    let self = this;
+    self.listXUMLResources('xslt', callback);
+};
+
+
+/** Exports **/
+module.exports = Bridge;
 module.exports.pack = pack;
