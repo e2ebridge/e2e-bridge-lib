@@ -628,6 +628,23 @@ Bridge.prototype.listXUMLServiceSessions = function(name, callback) {
 };
 
 /**
+ * Cancel a running session of the given service.
+ * @param {!string} name Name of the service.
+ * @param {!string} sessionId Id of the session to cancel.
+ * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ */
+Bridge.prototype.cancelXUMLServiceSession = function(name, sessionId, callback) {
+    let self = this;
+
+    _executeRequest(
+        self._composeRequestObject(
+            HTTP_DELETE,
+            endpoints.getServiceEndpoint(
+                HTTP_DELETE, XUML_SERVICE_TYPE, name, 'sessions', sessionId)),
+        callback);
+};
+
+/**
  * Get currently active preferences of the given service.
  * @param {!string} name Name of the service.
  * @param {!string} serviceType valid service type: 'xUML', 'node'...

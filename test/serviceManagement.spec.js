@@ -175,6 +175,20 @@ describe( "Services", function() {
                     done();
                 });
             });
+
+            it("can cancel a session", function (done) {
+
+                helper.skipIntegration();
+
+                scope.delete(endpoint('/sessions/4'))
+                    .reply(200, undefined);
+
+                helper.makeBridgeInstance().cancelXUMLServiceSession(helper.xUmlServiceInstance, '4', function (err) {
+                    expect(err).toBeFalsy();
+                    scope.done();
+                    done();
+                });
+            });
         });
 
         describe("'node'", function () {
