@@ -15,18 +15,29 @@ describe( "Custom notes", function() {
         nock.cleanAll();
     });
 
+    const referenceNotes = "<h1>This model is awesome!</h1>";
+
+    it("can be uploaded", function(done) {
+
+        scope.put(endpoint('/customnotes'), referenceNotes)
+            .reply(200, undefined);
+
+        helper.makeBridgeInstance().setXUMLCustomNotes(helper.xUmlServiceInstance, referenceNotes, function (err) {
+            expect(err).toBeFalsy();
+            scope.done();
+            done();
+        });
+
+    });
+
     it("can be downloaded", function(done) {
 
-        helper.skipIntegration();
-
-        const response = "<h1>This model is awesome!</h1>";
-
         scope.get(endpoint('/customnotes'))
-            .reply(200, response);
+            .reply(200, referenceNotes);
 
         helper.makeBridgeInstance().getXUMLCustomNotes(helper.xUmlServiceInstance, function (err, notes) {
             expect(err).toBeFalsy();
-            expect(notes).toEqual(response);
+            expect(notes).toEqual(referenceNotes);
             scope.done();
             done();
         });
