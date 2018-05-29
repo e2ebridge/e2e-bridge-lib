@@ -613,6 +613,21 @@ Bridge.prototype.removeJavaService = function( name, callback) {
 };
 
 /**
+ * Get list of currently running sessions of the given service.
+ * @param {!string} name Name of the service.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
+ */
+Bridge.prototype.listXUMLServiceSessions = function(name, callback) {
+    let self = this;
+
+    _executeRequest(
+        self._composeRequestObject(
+            HTTP_GET,
+            endpoints.getServiceEndpoint(HTTP_GET, XUML_SERVICE_TYPE, name, 'sessions')),
+        callback);
+};
+
+/**
  * Get currently active preferences of the given service.
  * @param {!string} name Name of the service.
  * @param {!string} serviceType valid service type: 'xUML', 'node'...

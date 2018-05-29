@@ -133,6 +133,48 @@ describe( "Services", function() {
                     done();
                 });
             });
+
+            it("can get session list", function (done) {
+
+                helper.skipIntegration();
+
+                const response = {
+                    "session": [
+                        {
+                            "sessionID": "4",
+                            "link": [
+                                {
+                                    "rel": "http://e2e.ch/bridge/session",
+                                    "href": "https://localhost:8080/bridge/rest/services/xuml/ThreadExample/sessions/4"
+                                }
+                            ],
+                            "transactionID": "00000001ab7f28ad000212eb4a7fc700e8b6e3f7",
+                            "startTime": "2018-05-29T10:43:47.500901Z",
+                            "callStack": [
+                                "wait",
+                                "urn:Services.ThreadService.ThreadPortType.ThreadPortType.wait",
+                                "Sleep_a_while"
+                            ]
+                        }
+                    ]
+                };
+
+                scope.get(endpoint('/sessions'))
+                    .reply(200, response);
+
+                helper.makeBridgeInstance().listXUMLServiceSessions(helper.xUmlServiceInstance, function (err, res) {
+                    expect(err).toBeFalsy();
+                    expect(Array.isArray(res.session)).toBeTruthy();
+                    const session = res.session[0];
+                    expect(session.sessionID).toBeDefined();
+                    expect(Array.isArray(session.link)).toBeTruthy();
+                    expect(session.transactionID).toBeDefined();
+                    expect(session.startTime).toBeDefined();
+                    expect(Array.isArray(session.callStack)).toBeDefined();
+                    scope.done();
+                    done();
+                });
+            });
         });
 
         describe("'node'", function () {
