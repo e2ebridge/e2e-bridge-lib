@@ -113,6 +113,26 @@ describe( "Services", function() {
                     done();
                 });
             });
+
+            it("can get repository", function (done) {
+
+                // note: this is a valid, empty zip file
+                const zip = Buffer.from([
+                    0x50, 0x4b, 0x05, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
+
+                scope.get(endpoint('/repository'))
+                    .reply(200, zip);
+
+                helper.makeBridgeInstance().getXUMLServiceRepository(helper.xUmlServiceInstance, function (err, res) {
+                    expect(err).toBeFalsy();
+                    expect(Buffer.isBuffer(res)).toBeTruthy();
+                    expect(res.indexOf(Buffer.from([0x50, 0x4b]))).toEqual(0); // 'PK' magic
+                    expect(res.includes(Buffer.from([0x50, 0x4b, 0x05, 0x06]))).toBeTruthy(); // central directory
+                    scope.done();
+                    done();
+                });
+            });
         });
 
         describe("'node'", function () {
