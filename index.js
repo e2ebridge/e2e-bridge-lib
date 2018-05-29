@@ -30,6 +30,19 @@ const HTTP_PUT = 'PUT';
 // TRACE & CONNECT are N/A
 
 /**
+ * Handle results of any Bridge API operation.
+ * @callback bridgeApiCallback
+ * @param {?Object} err Error object if error occurred.
+ * @param {?Object=} response Response object if no error occurred.
+ */
+
+/**
+ * Handle results of any Bridge API operation (no response values are expected).
+ * @callback bridgeApiNoResponseCallback
+ * @param {?Object} err Error object if error occurred.
+ */
+
+/**
  * Bridge object
  * @param {string} host
  * @param {Integer} port
@@ -47,8 +60,8 @@ function Bridge(host, port, user, password) {
 /**
  * Pack a directory
  * @param {(string)} directory The absolute directory path.
- * @param {string|{output: string}|function(?Object=)} options Packing options or the callback.
- * @param {function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ * @param {string|{output: string}|bridgeApiNoResponseCallback} options Packing options or the callback.
+ * @param {bridgeApiNoResponseCallback=} callback Function to call upon completion.
  */
 function pack( directory, options, callback) {
 
@@ -101,15 +114,8 @@ function archiveName(directory) {
 }
 
 /**
- * Handle results of any Bridge API operation.
- * @callback bridgeApiCallback
- * @param {?Object} err Error object if error occurred.
- * @param {?Object=} response Response object if no error occurred.
- */
-
-/**
  * Default callback for REST Bridge API
- * @type {bridgeApiCallback}
+ * @type {bridgeApiCallback|bridgeApiNoResponseCallback}
  */
 function _defaultCallback(err, response) {
     if(err) {
@@ -224,7 +230,7 @@ Bridge.prototype._composeDownloadRequest = function(endpoint, isBinary, getParam
  * Deploys service to the bridge
  * @param {(string|Buffer)} file The absolute file path to the repository (Node.js or xUML), a Buffer with repository content or the absolute directory path to pack and deploy.
  * @param {{startup: boolean, overwrite: boolean, overwritePrefs: boolean, npmInstall: boolean, runScripts: boolean, instanceName: string}|function(?Object=)} options Deployment options
- * @param {function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ * @param {bridgeApiNoResponseCallback=} callback Function to call upon completion.
  */
 Bridge.prototype.deployService = function( file, options, callback) {
 
@@ -288,7 +294,7 @@ Bridge.prototype.deployService = function( file, options, callback) {
 /**
  * List deployed services of given type or all.
  * @param {?string} serviceType 'xUML', 'node', or 'java'. If null, all services will be listed.
- * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
  */
 Bridge.prototype.listServices = function(serviceType, callback){
     let self = this;
@@ -304,7 +310,7 @@ Bridge.prototype.listServices = function(serviceType, callback){
 
 /**
  * List all deployed services.
- * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
  */
 Bridge.prototype.listAllServices = function(callback){
     let self = this;
@@ -313,7 +319,7 @@ Bridge.prototype.listAllServices = function(callback){
 
 /**
  * List deployed xUML services.
- * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
  */
 Bridge.prototype.listXUMLServices = function(callback){
     let self = this;
@@ -322,7 +328,7 @@ Bridge.prototype.listXUMLServices = function(callback){
 
 /**
  * List deployed Node.js services.
- * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
  */
 Bridge.prototype.listNodeServices = function(callback){
     let self = this;
@@ -331,7 +337,7 @@ Bridge.prototype.listNodeServices = function(callback){
 
 /**
  * List deployed java services.
- * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
  */
 Bridge.prototype.listJavaServices = function(callback){
     let self = this;
@@ -343,7 +349,7 @@ Bridge.prototype.listJavaServices = function(callback){
  * @param {!string} status 'start', 'stop' or 'kill'. Note, that 'kill' will not work for node.js services
  * @param {!string} name Name of the service.
  * @param {!string} serviceType 'xUML', 'node', or 'java'
- * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ * @param {bridgeApiNoResponseCallback=} callback Function to call upon completion.
  */
 Bridge.prototype.setServiceStatus = function(status, name, serviceType, callback){
     let self = this;
@@ -359,7 +365,7 @@ Bridge.prototype.setServiceStatus = function(status, name, serviceType, callback
  * Starts xUML service
  *
  * @param {!string} name Name of the service.
- * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ * @param {bridgeApiNoResponseCallback=} callback Function to call upon completion.
  */
 Bridge.prototype.startXUMLService = function( name, callback) {
     this.setServiceStatus("start", name, XUML_SERVICE_TYPE, callback);
@@ -369,7 +375,7 @@ Bridge.prototype.startXUMLService = function( name, callback) {
  * Stops xUML service
  *
  * @param {!string} name Name of the service.
- * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ * @param {bridgeApiNoResponseCallback=} callback Function to call upon completion.
  */
 Bridge.prototype.stopXUMLService = function( name, callback) {
     this.setServiceStatus("stop", name, XUML_SERVICE_TYPE, callback);
@@ -379,7 +385,7 @@ Bridge.prototype.stopXUMLService = function( name, callback) {
  * Kills xUML service
  *
  * @param {!string} name Name of the service.
- * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ * @param {bridgeApiNoResponseCallback=} callback Function to call upon completion.
  */
 Bridge.prototype.killXUMLService = function( name, callback) {
     this.setServiceStatus("kill", name, XUML_SERVICE_TYPE, callback);
@@ -389,7 +395,7 @@ Bridge.prototype.killXUMLService = function( name, callback) {
  * Starts Node.js service
  *
  * @param {!string} name Name of the service.
- * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ * @param {bridgeApiNoResponseCallback=} callback Function to call upon completion.
  */
 Bridge.prototype.startNodeService = function( name, callback) {
     this.setServiceStatus("start", name, NODE_SERVICE_TYPE, callback);
@@ -399,7 +405,7 @@ Bridge.prototype.startNodeService = function( name, callback) {
  * Stops Node.js service
  *
  * @param {!string} name Name of the service.
- * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ * @param {bridgeApiNoResponseCallback=} callback Function to call upon completion.
  */
 Bridge.prototype.stopNodeService = function( name, callback) {
     this.setServiceStatus("stop", name, NODE_SERVICE_TYPE, callback);
@@ -409,7 +415,7 @@ Bridge.prototype.stopNodeService = function( name, callback) {
  * Starts Java service
  *
  * @param {!string} name Name of the service.
- * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ * @param {bridgeApiNoResponseCallback=} callback Function to call upon completion.
  */
 Bridge.prototype.startJavaService = function( name, callback) {
     this.setServiceStatus("start", name, JAVA_SERVICE_TYPE, callback);
@@ -419,7 +425,7 @@ Bridge.prototype.startJavaService = function( name, callback) {
  * Stops Java service
  *
  * @param {!string} name Name of the service.
- * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ * @param {bridgeApiNoResponseCallback=} callback Function to call upon completion.
  */
 Bridge.prototype.stopJavaService = function( name, callback) {
     this.setServiceStatus("stop", name, JAVA_SERVICE_TYPE, callback);
@@ -429,7 +435,7 @@ Bridge.prototype.stopJavaService = function( name, callback) {
  * Queries the status of a service
  * @param {!string} name Name of the service.
  * @param {!string} serviceType 'xUML', 'node', or 'java'
- * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
  */
 Bridge.prototype.getServiceStatus = function(name, serviceType, callback){
     let self = this;
@@ -444,7 +450,7 @@ Bridge.prototype.getServiceStatus = function(name, serviceType, callback){
 /**
  * Queries the status of a xUML service
  * @param {!string} name Name of the service.
- * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
  */
 Bridge.prototype.getXUMLServiceStatus = function(name, callback){
     this.getServiceStatus(name, XUML_SERVICE_TYPE, callback);
@@ -453,7 +459,7 @@ Bridge.prototype.getXUMLServiceStatus = function(name, callback){
 /**
  * Queries the status of a Node.js service
  * @param {!string} name Name of the service.
- * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
  */
 Bridge.prototype.getNodeServiceStatus = function(name, callback){
     this.getServiceStatus(name, NODE_SERVICE_TYPE, callback);
@@ -462,7 +468,7 @@ Bridge.prototype.getNodeServiceStatus = function(name, callback){
 /**
  * Queries the status of a Java service
  * @param {!string} name Name of the service.
- * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
  */
 Bridge.prototype.getJavaServiceStatus = function(name, callback){
     this.getServiceStatus(name, JAVA_SERVICE_TYPE, callback);
@@ -471,7 +477,7 @@ Bridge.prototype.getJavaServiceStatus = function(name, callback){
 /**
  * Get extended information about a xUML service
  * @param {!string} name Name of the service.
- * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
  */
 Bridge.prototype.getXUMLServiceInfo = function(name, callback){
     let self = this;
@@ -486,7 +492,7 @@ Bridge.prototype.getXUMLServiceInfo = function(name, callback){
 /**
  * Get list of available model notes for the given xUML service
  * @param {!string} name Name of the service.
- * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
  */
 Bridge.prototype.getXUMLModelNotesList = function(name, callback){
     let self = this;
@@ -502,7 +508,7 @@ Bridge.prototype.getXUMLModelNotesList = function(name, callback){
  * Get model notes of the xUML service
  * @param {!string} name Name of the service.
  * @param {!string} notesFilename Name of the notes file to fetch.
- * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
  */
 Bridge.prototype.getXUMLModelNotes = function(name, notesFilename, callback){
     let self = this;
@@ -517,7 +523,7 @@ Bridge.prototype.getXUMLModelNotes = function(name, notesFilename, callback){
 /**
  * Get custom model notes of the xUML service
  * @param {!string} name Name of the service.
- * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
  */
 Bridge.prototype.getXUMLCustomNotes = function(name, callback){
     let self = this;
@@ -533,7 +539,7 @@ Bridge.prototype.getXUMLCustomNotes = function(name, callback){
  * Get custom model notes of the xUML service
  * @param {!string} name Name of the service.
  * @param {!string|!Buffer|!ReadStream} content The new content of the custom model notes.
- * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ * @param {bridgeApiNoResponseCallback=} callback Function to call upon completion.
  */
 Bridge.prototype.setXUMLCustomNotes = function(name, content, callback){
     let self = this;
@@ -552,7 +558,7 @@ Bridge.prototype.setXUMLCustomNotes = function(name, content, callback){
 /**
  * Export repository of the xUML service
  * @param {!string} name Name of the service.
- * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
  */
 Bridge.prototype.getXUMLServiceRepository = function(name, callback){
     let self = this;
@@ -570,7 +576,7 @@ Bridge.prototype.getXUMLServiceRepository = function(name, callback){
  * Remove service from the Bridge
  * @param {!string} name Name of the service.
  * @param {!string} serviceType 'xUML', 'node', or 'java'
- * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ * @param {bridgeApiNoResponseCallback=} callback Function to call upon completion.
  */
 Bridge.prototype.removeService = function(name, serviceType, callback){
     let self = this;
@@ -586,7 +592,7 @@ Bridge.prototype.removeService = function(name, serviceType, callback){
  * Removes xUML service from given node
  *
  * @param {!string} name Name of the service.
- * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ * @param {bridgeApiNoResponseCallback=} callback Function to call upon completion.
  */
 Bridge.prototype.removeXUMLService = function( name, callback) {
     this.removeService(name, XUML_SERVICE_TYPE, callback);
@@ -596,7 +602,7 @@ Bridge.prototype.removeXUMLService = function( name, callback) {
  * Removes Node.js service from given node
  *
  * @param {!string} name Name of the service.
- * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ * @param {bridgeApiNoResponseCallback=} callback Function to call upon completion.
  */
 Bridge.prototype.removeNodeService = function( name, callback) {
     this.removeService(name, NODE_SERVICE_TYPE, callback);
@@ -606,7 +612,7 @@ Bridge.prototype.removeNodeService = function( name, callback) {
  * Removes Java service from given node
  *
  * @param {!string} name Name of the service.
- * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ * @param {bridgeApiNoResponseCallback=} callback Function to call upon completion.
  */
 Bridge.prototype.removeJavaService = function( name, callback) {
     this.removeService(name, JAVA_SERVICE_TYPE, callback);
@@ -631,7 +637,7 @@ Bridge.prototype.listXUMLServiceSessions = function(name, callback) {
  * Cancel a running session of the given service.
  * @param {!string} name Name of the service.
  * @param {!string} sessionId Id of the session to cancel.
- * @param {?function(?Object=)} callback Called when done. If everything goes smoothly, parameter will be null.
+ * @param {bridgeApiNoResponseCallback=} callback Function to call upon completion.
  */
 Bridge.prototype.cancelXUMLServiceSession = function(name, sessionId, callback) {
     let self = this;
