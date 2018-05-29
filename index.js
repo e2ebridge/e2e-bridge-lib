@@ -202,6 +202,25 @@ Bridge.prototype._composeRequestObject = function(method, endpoint, content, get
 };
 
 /**
+ * Prepare settings for request module for download request.
+ * @param {!string} endpoint Bridge endpoint, we intend to call
+ * @param {?boolean=} isBinary Whether binary response is expected.
+ * @param {?Object=} getParams URI GET parameters to attach to endpoint (key-value pairs)
+ * @returns {Object}
+ * @private
+ */
+Bridge.prototype._composeDownloadRequest = function(endpoint, isBinary, getParams) {
+    let self = this;
+
+    const requestObject = self._composeRequestObject(HTTP_GET, endpoint, null, getParams);
+    requestObject.json = false;
+    if(isBinary) {
+        requestObject.encoding = null;
+    }
+    return requestObject;
+};
+
+/**
  * Deploys service to the bridge
  * @param {(string|Buffer)} file The absolute file path to the repository (Node.js or xUML), a Buffer with repository content or the absolute directory path to pack and deploy.
  * @param {{startup: boolean, overwrite: boolean, overwritePrefs: boolean, npmInstall: boolean, runScripts: boolean, instanceName: string}|function(?Object=)} options Deployment options
