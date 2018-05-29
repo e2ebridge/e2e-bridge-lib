@@ -37,4 +37,26 @@ describe( "Model notes", function() {
             done();
         });
     });
+
+    it("can be downloaded", function(done) {
+
+        helper.skipIntegration();
+
+        const response =
+            "Author:e2e.example.user.\n" +
+            "Created:8/12/16 8:57 AM.\n" +
+            "Title:.\n" +
+            "Comment:.\n";
+
+        scope.get(endpoint('/modelnotes/Model_119091974.txt'))
+            .reply(200, response);
+
+        helper.makeBridgeInstance().getXUMLModelNotes(helper.xUmlServiceInstance, 'Model_119091974.txt', function (err, notes) {
+            expect(err).toBeFalsy();
+            expect(notes).toEqual(response);
+            scope.done();
+            done();
+        });
+
+    });
 });
