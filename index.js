@@ -1118,6 +1118,20 @@ Bridge.prototype.getXUMLXsltResources = function(name, callback) {
     self.getXUMLResources('xslt', name, callback);
 };
 
+/**
+ * List xUML variables.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
+ */
+Bridge.prototype.listXUMLVariables = function(callback) {
+    let self = this;
+
+    _executeRequest(
+        self._composeRequestObject(
+            HTTP_GET,
+            endpoints.getXUMLEndpoint(HTTP_GET, 'variables')),
+        callback);
+};
+
 
 /** Exports **/
 module.exports = Bridge;
