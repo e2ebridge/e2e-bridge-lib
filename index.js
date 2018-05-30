@@ -1072,6 +1072,52 @@ Bridge.prototype.deleteXUMLXsltResources = function(name, callback) {
     self.deleteXUMLResources('xslt', name, callback);
 };
 
+/**
+ * Get resources of the given type.
+ * @param {!string} type Valid resource type: 'resource', 'java', 'xslt'.
+ * @param {!string} name Name of the resource.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
+ */
+Bridge.prototype.getXUMLResources = function(type, name, callback) {
+    let self = this;
+
+    _executeRequest(
+        self._composeDownloadRequest(
+            endpoints.getXUMLResourcesEndpoint(HTTP_GET, type, name),
+            true),
+        callback);
+};
+
+/**
+ * Get resources of the 'resource' type.
+ * @param {!string} name Name of the resource.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
+ */
+Bridge.prototype.getXUMLResourceResources = function(name, callback) {
+    let self = this;
+    self.getXUMLResources('resource', name, callback);
+};
+
+/**
+ * Get resources of the 'java' type.
+ * @param {!string} name Name of the resource.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
+ */
+Bridge.prototype.getXUMLJavaResources = function(name, callback) {
+    let self = this;
+    self.getXUMLResources('java', name, callback);
+};
+
+/**
+ * Get resources of the 'xslt' type.
+ * @param {!string} name Name of the resource.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
+ */
+Bridge.prototype.getXUMLXsltResources = function(name, callback) {
+    let self = this;
+    self.getXUMLResources('xslt', name, callback);
+};
+
 
 /** Exports **/
 module.exports = Bridge;

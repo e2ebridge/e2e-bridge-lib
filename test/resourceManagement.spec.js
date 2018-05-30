@@ -97,6 +97,22 @@ describe( "Resources", function() {
                     done();
                 });
             });
+
+            it("can be downloaded", function (done) {
+
+                helper.skipIntegration();
+
+                scope.get(endpoint('/gugus.txt'))
+                    .reply(200, 'Gugus!'); // the real API gives us zip file!
+
+                helper.makeBridgeInstance().getXUMLResourceResources('gugus.txt', function (err, res) {
+                    expect(err).toBeFalsy();
+                    expect(Buffer.isBuffer(res)).toBeTruthy();
+                    expect(res.toString()).toEqual('Gugus!');
+                    scope.done();
+                    done();
+                });
+            });
         });
 
         describe("'java'", function () {
@@ -168,6 +184,22 @@ describe( "Resources", function() {
                     done();
                 });
             });
+
+            it("can be downloaded", function (done) {
+
+                helper.skipIntegration();
+
+                scope.get(endpoint('/gugus.txt'))
+                    .reply(200, 'Gugus!'); // the real API gives us zip file!
+
+                helper.makeBridgeInstance().getXUMLJavaResources('gugus.txt', function (err, res) {
+                    expect(err).toBeFalsy();
+                    expect(Buffer.isBuffer(res)).toBeTruthy();
+                    expect(res.toString()).toEqual('Gugus!');
+                    scope.done();
+                    done();
+                });
+            });
         });
 
         describe("'xslt'", function () {
@@ -229,6 +261,22 @@ describe( "Resources", function() {
 
                 helper.makeBridgeInstance().deleteXUMLXsltResources('gugus.txt', function (err) {
                     expect(err).toBeFalsy();
+                    scope.done();
+                    done();
+                });
+            });
+
+            it("can be downloaded", function (done) {
+
+                helper.skipIntegration();
+
+                scope.get(endpoint('/gugus.txt'))
+                    .reply(200, 'Gugus!'); // the real API gives us zip file!
+
+                helper.makeBridgeInstance().getXUMLXsltResources('gugus.txt', function (err, res) {
+                    expect(err).toBeFalsy();
+                    expect(Buffer.isBuffer(res)).toBeTruthy();
+                    expect(res.toString()).toEqual('Gugus!');
                     scope.done();
                     done();
                 });
