@@ -83,6 +83,20 @@ describe( "Resources", function() {
                     done();
                 });
             });
+
+            it("can be deleted", function (done) {
+
+                helper.skipIntegration();
+
+                scope.delete(endpoint('/gugus.txt'))
+                    .reply(200, undefined);
+
+                helper.makeBridgeInstance().deleteXUMLResourceResources('gugus.txt', function (err) {
+                    expect(err).toBeFalsy();
+                    scope.done();
+                    done();
+                });
+            });
         });
 
         describe("'java'", function () {
@@ -140,6 +154,20 @@ describe( "Resources", function() {
                     done();
                 });
             });
+
+            it("can be deleted", function (done) {
+
+                helper.skipIntegration();
+
+                scope.delete(endpoint('/gugus.txt'))
+                    .reply(200, undefined);
+
+                helper.makeBridgeInstance().deleteXUMLJavaResources('gugus.txt', function (err) {
+                    expect(err).toBeFalsy();
+                    scope.done();
+                    done();
+                });
+            });
         });
 
         describe("'xslt'", function () {
@@ -186,6 +214,20 @@ describe( "Resources", function() {
                     .reply(200, undefined);
 
                 helper.makeBridgeInstance().uploadXUMLXsltResources('Gugus!', 'gugus.txt', function (err) {
+                    expect(err).toBeFalsy();
+                    scope.done();
+                    done();
+                });
+            });
+
+            it("can be deleted", function (done) {
+
+                helper.skipIntegration();
+
+                scope.delete(endpoint('/gugus.txt'))
+                    .reply(200, undefined);
+
+                helper.makeBridgeInstance().deleteXUMLXsltResources('gugus.txt', function (err) {
                     expect(err).toBeFalsy();
                     scope.done();
                     done();

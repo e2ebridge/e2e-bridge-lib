@@ -1026,6 +1026,52 @@ Bridge.prototype.uploadXUMLXsltResources = function(content, filename, callback)
     self.uploadXUMLResources('xslt', content, filename, callback);
 };
 
+/**
+ * Delete resources of the given type.
+ * @param {!string} type Valid resource type: 'resource', 'java', 'xslt'.
+ * @param {!string} name Name of the resource.
+ * @param {bridgeApiNoResponseCallback=} callback Function to call upon completion.
+ */
+Bridge.prototype.deleteXUMLResources = function(type, name, callback) {
+    let self = this;
+
+    _executeRequest(
+        self._composeRequestObject(
+            HTTP_DELETE,
+            endpoints.getXUMLResourcesEndpoint(HTTP_DELETE, type, name)),
+        callback);
+};
+
+/**
+ * Delete resources of the 'resource' type.
+ * @param {!string} name Name of the resource.
+ * @param {bridgeApiNoResponseCallback=} callback Function to call upon completion.
+ */
+Bridge.prototype.deleteXUMLResourceResources = function(name, callback) {
+    let self = this;
+    self.deleteXUMLResources('resource', name, callback);
+};
+
+/**
+ * Delete resources of the 'java' type.
+ * @param {!string} name Name of the resource.
+ * @param {bridgeApiNoResponseCallback=} callback Function to call upon completion.
+ */
+Bridge.prototype.deleteXUMLJavaResources = function(name, callback) {
+    let self = this;
+    self.deleteXUMLResources('java', name, callback);
+};
+
+/**
+ * Delete resources of the 'xslt' type.
+ * @param {!string} name Name of the resource.
+ * @param {bridgeApiNoResponseCallback=} callback Function to call upon completion.
+ */
+Bridge.prototype.deleteXUMLXsltResources = function(name, callback) {
+    let self = this;
+    self.deleteXUMLResources('xslt', name, callback);
+};
+
 
 /** Exports **/
 module.exports = Bridge;
