@@ -957,6 +957,75 @@ Bridge.prototype.listXUMLXsltResources = function(callback) {
     self.listXUMLResources('xslt', callback);
 };
 
+/**
+ * Upload resources of the given type.
+ * @param {!string} type Valid resource type: 'resource', 'java', 'xslt'.
+ * @param {!string|!Buffer|!ReadStream} content The resource content.
+ * @param {?string|bridgeApiNoResponseCallback=} filename Name of the resource or the callback.
+ * @param {bridgeApiNoResponseCallback=} callback Function to call upon completion.
+ */
+Bridge.prototype.uploadXUMLResources = function(type, content, filename, callback) {
+    let self = this;
+
+    if(typeof filename === 'function') {
+        callback = filename;
+        filename = undefined;
+    }
+
+    const requestObject = self._composeRequestObject(
+        HTTP_POST,
+        endpoints.getXUMLResourcesEndpoint(HTTP_POST, type)
+    );
+
+    if(filename) {
+        requestObject.formData = {
+            uploadFile: {
+                value: content,
+                options: {
+                    filename
+                }
+            }
+        };
+    } else {
+        requestObject.formData = { uploadFile: content };
+    }
+
+    _executeRequest(requestObject, callback);
+};
+
+/**
+ * Upload resources of the 'resource' type.
+ * @param {!string|!Buffer|!ReadStream} content The resource content.
+ * @param {?string|bridgeApiNoResponseCallback=} filename Name of the resource or the callback.
+ * @param {bridgeApiNoResponseCallback=} callback Function to call upon completion.
+ */
+Bridge.prototype.uploadXUMLResourceResources = function(content, filename, callback) {
+    let self = this;
+    self.uploadXUMLResources('resource', content, filename, callback);
+};
+
+/**
+ * Upload resources of the 'java' type.
+ * @param {!string|!Buffer|!ReadStream} content The resource content.
+ * @param {?string|bridgeApiNoResponseCallback=} filename Name of the resource or the callback.
+ * @param {bridgeApiNoResponseCallback=} callback Function to call upon completion.
+ */
+Bridge.prototype.uploadXUMLJavaResources = function(content, filename, callback) {
+    let self = this;
+    self.uploadXUMLResources('java', content, filename, callback);
+};
+
+/**
+ * Upload resources of the 'xslt' type.
+ * @param {!string|!Buffer|!ReadStream} content The resource content.
+ * @param {?string|bridgeApiNoResponseCallback=} filename Name of the resource or the callback.
+ * @param {bridgeApiNoResponseCallback=} callback Function to call upon completion.
+ */
+Bridge.prototype.uploadXUMLXsltResources = function(content, filename, callback) {
+    let self = this;
+    self.uploadXUMLResources('xslt', content, filename, callback);
+};
+
 
 /** Exports **/
 module.exports = Bridge;

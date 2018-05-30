@@ -16,6 +16,18 @@ describe( "Resources", function() {
     });
 
     describe('type', function() {
+
+        const uploadBodyRegexp = new RegExp([
+            /^-*.*\r\n/,
+            /Content-Disposition: form-data; name="uploadFile"; filename="gugus.txt"\r\n/,
+            /Content-Type: text\/plain/,
+            /\r\n/,
+            /\r\n/,
+            /Gugus!\r\n/,
+            /-*.*--/,
+            /\r\n$/
+        ].map(r => r.source).join(''));
+
         describe("'resource'", function () {
 
             function endpoint(tail) {
@@ -53,6 +65,20 @@ describe( "Resources", function() {
                         expect(f.href).toEqual(`${helper.base}/bridge/rest/xuml/resource/${f.name}`);
                         expect(f.fileSize).toBeDefined();
                     });
+                    scope.done();
+                    done();
+                });
+            });
+
+            it("can be uploaded", function (done) {
+
+                helper.skipIntegration();
+
+                scope.post(endpoint(''), uploadBodyRegexp)
+                    .reply(200, undefined);
+
+                helper.makeBridgeInstance().uploadXUMLResourceResources('Gugus!', 'gugus.txt', function (err) {
+                    expect(err).toBeFalsy();
                     scope.done();
                     done();
                 });
@@ -100,6 +126,20 @@ describe( "Resources", function() {
                     done();
                 });
             });
+
+            it("can be uploaded", function (done) {
+
+                helper.skipIntegration();
+
+                scope.post(endpoint(''), uploadBodyRegexp)
+                    .reply(200, undefined);
+
+                helper.makeBridgeInstance().uploadXUMLJavaResources('Gugus!', 'gugus.txt', function (err) {
+                    expect(err).toBeFalsy();
+                    scope.done();
+                    done();
+                });
+            });
         });
 
         describe("'xslt'", function () {
@@ -133,6 +173,20 @@ describe( "Resources", function() {
                         expect(f.href).toEqual(`${helper.base}/bridge/rest/xuml/xslt/${f.name}`);
                         expect(f.fileSize).toBeDefined();
                     });
+                    scope.done();
+                    done();
+                });
+            });
+
+            it("can be uploaded", function (done) {
+
+                helper.skipIntegration();
+
+                scope.post(endpoint(''), uploadBodyRegexp)
+                    .reply(200, undefined);
+
+                helper.makeBridgeInstance().uploadXUMLXsltResources('Gugus!', 'gugus.txt', function (err) {
+                    expect(err).toBeFalsy();
                     scope.done();
                     done();
                 });
