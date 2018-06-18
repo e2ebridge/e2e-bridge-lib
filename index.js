@@ -43,6 +43,34 @@ const HTTP_PUT = 'PUT';
  */
 
 /**
+ * @typedef {Object} DeploymentOptions
+ * @property {?boolean} startup
+ * @property {?boolean} overwritePrefs
+ * @property {?boolean} npmInstall
+ * @property {?boolean} runScripts
+ * @property {?string} instanceName
+ */
+
+const deploymentOptions = Object.freeze({
+    STARTUP: "startup",
+    OVERWRITE: "overwrite",
+    SETTINGS: "overwritePrefs",
+    NPM_SCRIPTS: "runScripts",
+    NPM_INSTALL: "npmInstall",
+    INSTANCE_NAME: "instanceName"
+});
+
+/** @type !Readonly<DeploymentOptions> */
+const defaultDeploymentOptions = Object.freeze({
+    [deploymentOptions.STARTUP]: false,
+    [deploymentOptions.OVERWRITE]: false,
+    [deploymentOptions.SETTINGS]: false,
+    [deploymentOptions.NPM_INSTALL]: false,
+    [deploymentOptions.NPM_SCRIPTS]: false,
+    [deploymentOptions.INSTANCE_NAME]: undefined,
+});
+
+/**
  * Bridge object
  * @param {string} host
  * @param {Integer} port
@@ -229,7 +257,7 @@ Bridge.prototype._composeDownloadRequest = function(endpoint, isBinary, getParam
 /**
  * Deploys service to the bridge
  * @param {(string|Buffer)} file The absolute file path to the repository (Node.js or xUML), a Buffer with repository content or the absolute directory path to pack and deploy.
- * @param {{startup: boolean, overwrite: boolean, overwritePrefs: boolean, npmInstall: boolean, runScripts: boolean, instanceName: string}|function(?Object=)} options Deployment options
+ * @param {DeploymentOptions|function(?Object=)} options Deployment options
  * @param {bridgeApiNoResponseCallback=} callback Function to call upon completion.
  */
 Bridge.prototype.deployService = function( file, options, callback) {
@@ -1136,3 +1164,5 @@ Bridge.prototype.listXUMLVariables = function(callback) {
 /** Exports **/
 module.exports = Bridge;
 module.exports.pack = pack;
+module.exports.deploymentOptions = deploymentOptions;
+module.exports.defaultDeploymentOptions = defaultDeploymentOptions;
