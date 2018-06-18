@@ -49,6 +49,7 @@ const HTTP_PUT = 'PUT';
  * @property {?boolean} npmInstall
  * @property {?boolean} runScripts
  * @property {?string} instanceName
+ * @property {?boolean} preserveNodeModules
  */
 
 const deploymentOptions = Object.freeze({
@@ -57,7 +58,8 @@ const deploymentOptions = Object.freeze({
     SETTINGS: "overwritePrefs",
     NPM_SCRIPTS: "runScripts",
     NPM_INSTALL: "npmInstall",
-    INSTANCE_NAME: "instanceName"
+    INSTANCE_NAME: "instanceName",
+    PRESERVE_NODE_MODULES: "preserveNodeModules",
 });
 
 /** @type !Readonly<DeploymentOptions> */
@@ -68,6 +70,7 @@ const defaultDeploymentOptions = Object.freeze({
     [deploymentOptions.NPM_INSTALL]: false,
     [deploymentOptions.NPM_SCRIPTS]: false,
     [deploymentOptions.INSTANCE_NAME]: undefined,
+    [deploymentOptions.PRESERVE_NODE_MODULES]: false,
 });
 
 /**
