@@ -1,8 +1,9 @@
 let helper = require('./helper');
 let nock = require('nock');
 
-describe( "Services", function() {
+describe("Services", function() {
     let scope;
+
     function serviceUriPath(serviceType, serviceName, tail) {
         return `/bridge/rest/services/${serviceType}/${serviceName}${tail}`;
     }
@@ -16,63 +17,63 @@ describe( "Services", function() {
     });
 
     describe('type', function() {
-        describe("'xUML'", function () {
+        describe("'xUML'", function() {
 
             function endpoint(tail) {
                 return serviceUriPath('xuml', helper.xUmlServiceInstance, tail);
             }
 
-            it("can be started", function (done) {
+            it("can be started", function(done) {
                 scope.put(endpoint('/start'))
                     .reply(200, undefined);
 
-                helper.makeBridgeInstance().startXUMLService(helper.xUmlServiceInstance, function (err) {
+                helper.makeBridgeInstance().startXUMLService(helper.xUmlServiceInstance, function(err) {
                     expect(err).toBeFalsy();
                     scope.done();
                     done();
                 });
             });
 
-            it("can be stopped", function (done) {
+            it("can be stopped", function(done) {
                 scope.put(endpoint('/stop'))
                     .reply(200, undefined);
 
-                helper.makeBridgeInstance().stopXUMLService(helper.xUmlServiceInstance, function (err) {
+                helper.makeBridgeInstance().stopXUMLService(helper.xUmlServiceInstance, function(err) {
                     expect(err).toBeFalsy();
                     scope.done();
                     done();
                 });
             });
 
-            it("can be killed", function (done) {
+            it("can be killed", function(done) {
 
                 helper.skipIntegration();
 
                 scope.put(endpoint('/kill'))
                     .reply(200, undefined);
 
-                helper.makeBridgeInstance().killXUMLService(helper.xUmlServiceInstance, function (err) {
+                helper.makeBridgeInstance().killXUMLService(helper.xUmlServiceInstance, function(err) {
                     expect(err).toBeFalsy();
                     scope.done();
                     done();
                 });
             });
 
-            it("can be removed", function (done) {
+            it("can be removed", function(done) {
 
                 helper.skipIntegration();
 
                 scope.delete(endpoint(''))
                     .reply(200, undefined);
 
-                helper.makeBridgeInstance().removeXUMLService(helper.xUmlServiceInstance, function (err) {
+                helper.makeBridgeInstance().removeXUMLService(helper.xUmlServiceInstance, function(err) {
                     expect(err).toBeFalsy();
                     scope.done();
                     done();
                 });
             });
 
-            it("can get status", function (done) {
+            it("can get status", function(done) {
 
                 const response = {
                     name: helper.xUmlServiceInstance,
@@ -83,7 +84,7 @@ describe( "Services", function() {
                 scope.get(endpoint(''))
                     .reply(200, response);
 
-                helper.makeBridgeInstance().getXUMLServiceStatus(helper.xUmlServiceInstance, function (err, res) {
+                helper.makeBridgeInstance().getXUMLServiceStatus(helper.xUmlServiceInstance, function(err, res) {
                     expect(err).toBeFalsy();
                     expect(res).toEqual(response);
                     scope.done();
@@ -91,7 +92,7 @@ describe( "Services", function() {
                 });
             });
 
-            it("can get extended information", function (done) {
+            it("can get extended information", function(done) {
 
                 const response = {
                     "restInfo": [],
@@ -103,7 +104,7 @@ describe( "Services", function() {
                 scope.get(endpoint('/info'))
                     .reply(200, response);
 
-                helper.makeBridgeInstance().getXUMLServiceInfo(helper.xUmlServiceInstance, function (err, res) {
+                helper.makeBridgeInstance().getXUMLServiceInfo(helper.xUmlServiceInstance, function(err, res) {
                     expect(err).toBeFalsy();
                     expect(res.restInfo).toBeDefined();
                     expect(res.soapInfo).toBeDefined();
@@ -114,7 +115,7 @@ describe( "Services", function() {
                 });
             });
 
-            it("can get repository", function (done) {
+            it("can get repository", function(done) {
 
                 // note: this is a valid, empty zip file
                 const zip = Buffer.from([
@@ -124,7 +125,7 @@ describe( "Services", function() {
                 scope.get(endpoint('/repository'))
                     .reply(200, zip);
 
-                helper.makeBridgeInstance().getXUMLServiceRepository(helper.xUmlServiceInstance, function (err, res) {
+                helper.makeBridgeInstance().getXUMLServiceRepository(helper.xUmlServiceInstance, function(err, res) {
                     expect(err).toBeFalsy();
                     expect(Buffer.isBuffer(res)).toBeTruthy();
                     expect(res.indexOf(Buffer.from([0x50, 0x4b]))).toEqual(0); // 'PK' magic
@@ -134,7 +135,7 @@ describe( "Services", function() {
                 });
             });
 
-            it("can get session list", function (done) {
+            it("can get session list", function(done) {
 
                 helper.skipIntegration();
 
@@ -162,7 +163,7 @@ describe( "Services", function() {
                 scope.get(endpoint('/sessions'))
                     .reply(200, response);
 
-                helper.makeBridgeInstance().listXUMLServiceSessions(helper.xUmlServiceInstance, function (err, res) {
+                helper.makeBridgeInstance().listXUMLServiceSessions(helper.xUmlServiceInstance, function(err, res) {
                     expect(err).toBeFalsy();
                     expect(Array.isArray(res.session)).toBeTruthy();
                     const session = res.session[0];
@@ -176,14 +177,14 @@ describe( "Services", function() {
                 });
             });
 
-            it("can cancel a session", function (done) {
+            it("can cancel a session", function(done) {
 
                 helper.skipIntegration();
 
                 scope.delete(endpoint('/sessions/4'))
                     .reply(200, undefined);
 
-                helper.makeBridgeInstance().cancelXUMLServiceSession(helper.xUmlServiceInstance, '4', function (err) {
+                helper.makeBridgeInstance().cancelXUMLServiceSession(helper.xUmlServiceInstance, '4', function(err) {
                     expect(err).toBeFalsy();
                     scope.done();
                     done();
@@ -191,49 +192,49 @@ describe( "Services", function() {
             });
         });
 
-        describe("'node'", function () {
+        describe("'node'", function() {
 
             function endpoint(tail) {
                 return serviceUriPath('nodejs', helper.nodeJsServiceInstance, tail);
             }
 
-            it("can be started", function (done) {
+            it("can be started", function(done) {
                 scope.put(endpoint('/start'))
                     .reply(200, undefined);
 
-                helper.makeBridgeInstance().startNodeService(helper.nodeJsServiceInstance, function (err) {
+                helper.makeBridgeInstance().startNodeService(helper.nodeJsServiceInstance, function(err) {
                     expect(err).toBeFalsy();
                     scope.done();
                     done();
                 });
             });
 
-            it("can be stopped", function (done) {
+            it("can be stopped", function(done) {
                 scope.put(endpoint('/stop'))
                     .reply(200, undefined);
 
-                helper.makeBridgeInstance().stopNodeService(helper.nodeJsServiceInstance, function (err) {
+                helper.makeBridgeInstance().stopNodeService(helper.nodeJsServiceInstance, function(err) {
                     expect(err).toBeFalsy();
                     scope.done();
                     done();
                 });
             });
 
-            it("can be removed", function (done) {
+            it("can be removed", function(done) {
 
                 helper.skipIntegration();
 
                 scope.delete(endpoint(''))
                     .reply(200, undefined);
 
-                helper.makeBridgeInstance().removeNodeService(helper.nodeJsServiceInstance, function (err) {
+                helper.makeBridgeInstance().removeNodeService(helper.nodeJsServiceInstance, function(err) {
                     expect(err).toBeFalsy();
                     scope.done();
                     done();
                 });
             });
 
-            it("can be listed", function (done) {
+            it("can be listed", function(done) {
 
                 helper.skipIntegration();
 
@@ -251,7 +252,7 @@ describe( "Services", function() {
                 scope.get('/bridge/rest/services/nodejs')
                     .reply(200, response);
 
-                helper.makeBridgeInstance().listNodeServices(function (err, services) {
+                helper.makeBridgeInstance().listNodeServices(function(err, services) {
                     expect(err).toBeFalsy();
                     expect(services).toEqual(response);
                     scope.done();
@@ -259,7 +260,7 @@ describe( "Services", function() {
                 });
             });
 
-            it("can get status", function (done) {
+            it("can get status", function(done) {
 
                 const response = {
                     name: helper.nodeJsServiceInstance,
@@ -270,7 +271,7 @@ describe( "Services", function() {
                 scope.get(endpoint(''))
                     .reply(200, response);
 
-                helper.makeBridgeInstance().getNodeServiceStatus(helper.nodeJsServiceInstance, function (err, res) {
+                helper.makeBridgeInstance().getNodeServiceStatus(helper.nodeJsServiceInstance, function(err, res) {
                     expect(err).toBeFalsy();
                     expect(res).toEqual(response);
                     scope.done();
@@ -279,55 +280,55 @@ describe( "Services", function() {
             });
         });
 
-        describe("'java'", function () {
+        describe("'java'", function() {
 
             function endpoint(tail) {
                 return serviceUriPath('java', helper.javaServiceInstance, tail);
             }
 
-            it("can be started", function (done) {
+            it("can be started", function(done) {
 
                 helper.skipIntegration();
 
                 scope.put(endpoint('/start'))
                     .reply(200, undefined);
 
-                helper.makeBridgeInstance().startJavaService(helper.javaServiceInstance, function (err) {
+                helper.makeBridgeInstance().startJavaService(helper.javaServiceInstance, function(err) {
                     expect(err).toBeFalsy();
                     scope.done();
                     done();
                 });
             });
 
-            it("can be stopped", function (done) {
+            it("can be stopped", function(done) {
 
                 helper.skipIntegration();
 
                 scope.put(endpoint('/stop'))
                     .reply(200, undefined);
 
-                helper.makeBridgeInstance().stopJavaService(helper.javaServiceInstance, function (err) {
+                helper.makeBridgeInstance().stopJavaService(helper.javaServiceInstance, function(err) {
                     expect(err).toBeFalsy();
                     scope.done();
                     done();
                 });
             });
 
-            it("can be removed", function (done) {
+            it("can be removed", function(done) {
 
                 helper.skipIntegration();
 
                 scope.delete(endpoint(''))
                     .reply(200, undefined);
 
-                helper.makeBridgeInstance().removeJavaService(helper.javaServiceInstance, function (err) {
+                helper.makeBridgeInstance().removeJavaService(helper.javaServiceInstance, function(err) {
                     expect(err).toBeFalsy();
                     scope.done();
                     done();
                 });
             });
 
-            it("can get status", function (done) {
+            it("can get status", function(done) {
 
                 helper.skipIntegration();
 
@@ -340,7 +341,7 @@ describe( "Services", function() {
                 scope.get(endpoint(''))
                     .reply(200, response);
 
-                helper.makeBridgeInstance().getJavaServiceStatus(helper.javaServiceInstance, function (err, res) {
+                helper.makeBridgeInstance().getJavaServiceStatus(helper.javaServiceInstance, function(err, res) {
                     expect(err).toBeFalsy();
                     expect(res).toEqual(response);
                     scope.done();
@@ -354,7 +355,7 @@ describe( "Services", function() {
 
         const body = /^.*\r\nContent-Disposition: form-data; name="uploadFile"; filename="repository.zip"\r\nContent-Type: application\/zip\r\n\r\ngugus\r\n.*\r\n$/
 
-        it("works", function (done) {
+        it("works", function(done) {
 
             helper.skipIntegration();
 
@@ -364,7 +365,7 @@ describe( "Services", function() {
             helper.makeBridgeInstance().deployService(
                 Buffer.from('gugus'),
                 {},
-                function (err) {
+                function(err) {
                     expect(err).toBeFalsy();
                     scope.done();
                     done();
@@ -372,7 +373,7 @@ describe( "Services", function() {
             );
         });
 
-        it("passes parameters", function (done) {
+        it("passes parameters", function(done) {
 
             helper.skipIntegration();
 
@@ -389,7 +390,7 @@ describe( "Services", function() {
                     runScripts: false,
                     instanceName: 'xxxy',
                 },
-                function (err) {
+                function(err) {
                     expect(err).toBeFalsy();
                     scope.done();
                     done();

@@ -94,33 +94,33 @@ function Bridge(host, port, user, password) {
  * @param {string|{output: string}|bridgeApiNoResponseCallback} options Packing options or the callback.
  * @param {bridgeApiNoResponseCallback=} callback Function to call upon completion.
  */
-function pack( directory, options, callback) {
+function pack(directory, options, callback) {
 
-    if(!options){
+    if(!options) {
         options = {};
     }
 
-    if( typeof options === 'function'){
+    if(typeof options === 'function') {
         callback = options;
         options = {};
     }
 
-    if (typeof options === 'string') {
-        options = { output: options }
+    if(typeof options === 'string') {
+        options = {output: options}
     }
 
-    fs.readdir(directory, function(err){
-        if (err) {
+    fs.readdir(directory, function(err) {
+        if(err) {
             return callback({errorType: "Filesystem error", error: err});
         }
 
         try {
             var output = path.resolve(archiveName(directory)); // this also ensures that 'directory' contains a valid node.js package
-        } catch (e) {
+        } catch(e) {
             return callback({errorType: "Pack error", error: e});
         }
 
-        if (options.output) {
+        if(options.output) {
             output = options.output;
         }
 
@@ -137,7 +137,7 @@ function pack( directory, options, callback) {
  */
 function archiveName(directory) {
     const pkg = require('package')(directory);
-    if (pkg && pkg.name && pkg.version) {
+    if(pkg && pkg.name && pkg.version) {
         return pkg.name + '-' + pkg.version + '.zip';
     } else {
         throw {errorType: 'Pack error', error: new Error('package.json is incomplete')};
@@ -151,7 +151,7 @@ function archiveName(directory) {
 function _defaultCallback(err, response) {
     if(err) {
         console.error(err);
-    } else if(response){
+    } else if(response) {
         console.log(response);
     }
 }
@@ -191,12 +191,12 @@ function _executeRequest(options, callback) {
 
     request(options,
         function(error, response, body) {
-            if (!error && response.statusCode === 200) {
+            if(!error && response.statusCode === 200) {
                 callback(null, body)
-            } else if(!error){
-                callback({ errorType: "Bridge error", error: body});
+            } else if(!error) {
+                callback({errorType: "Bridge error", error: body});
             } else {
-                callback({ errorType: "HTTP error", error: { details: error, response: response}});
+                callback({errorType: "HTTP error", error: {details: error, response: response}});
             }
         });
 }
@@ -263,11 +263,11 @@ Bridge.prototype._composeDownloadRequest = function(endpoint, isBinary, getParam
  * @param {DeploymentOptions|function(?Object=)} options Deployment options
  * @param {bridgeApiNoResponseCallback=} callback Function to call upon completion.
  */
-Bridge.prototype.deployService = function( file, options, callback) {
+Bridge.prototype.deployService = function(file, options, callback) {
 
     let self = this;
 
-    if( !callback && typeof options === 'function'){
+    if(!callback && typeof options === 'function') {
         callback = options;
         options = null;
     }
@@ -279,7 +279,7 @@ Bridge.prototype.deployService = function( file, options, callback) {
 
     requestObject.qs = options;
 
-    if( Buffer.isBuffer(file)){
+    if(Buffer.isBuffer(file)) {
         requestObject.formData = {
             uploadFile: {
                 value: file,
@@ -290,52 +290,51 @@ Bridge.prototype.deployService = function( file, options, callback) {
         };
         _executeRequest(requestObject, callback);
     } else {
-        fs.stat(file, function(err, stat){
-            if (err) {
-                return callback({ errorType: "Filesystem error", error: err});
+        fs.stat(file, function(err, stat) {
+            if(err) {
+                return callback({errorType: "Filesystem error", error: err});
             }
 
-            if(stat.isDirectory()){
+            if(stat.isDirectory()) {
                 let repositoryPath = tmp.fileSync({prefix: archiveName(file)}).name;
 
-                pack(file, {output: repositoryPath}, function(err){
-                    if (err) {
-                        return callback({ errorType: "Pack error", error: err});
+                pack(file, {output: repositoryPath}, function(err) {
+                    if(err) {
+                        return callback({errorType: "Pack error", error: err});
                     }
 
                     file = repositoryPath;
 
-                    requestObject.formData = { uploadFile: fs.createReadStream(file) };
-                    _executeRequest(requestObject, function(err){
-                        fs.unlink(file,function(){
+                    requestObject.formData = {uploadFile: fs.createReadStream(file)};
+                    _executeRequest(requestObject, function(err) {
+                        fs.unlink(file, function() {
                             callback(err);
                         });
                     });
 
                 });
             } else {
-                requestObject.formData = { uploadFile: fs.createReadStream(file) };
+                requestObject.formData = {uploadFile: fs.createReadStream(file)};
                 _executeRequest(requestObject, callback);
             }
         });
     }
 };
 
-
 /**
  * List deployed services of given type or all.
  * @param {?string} serviceType 'xUML', 'node', or 'java'. If null, all services will be listed.
  * @param {bridgeApiCallback=} callback Function to call upon completion.
  */
-Bridge.prototype.listServices = function(serviceType, callback){
+Bridge.prototype.listServices = function(serviceType, callback) {
     let self = this;
 
     _executeRequest(
         self._composeRequestObject(
             HTTP_GET,
-            serviceType ?
-                endpoints.getServiceEndpoint(HTTP_GET, serviceType) :
-                endpoints.getServicesEndpoint(HTTP_GET)),
+            serviceType
+            ? endpoints.getServiceEndpoint(HTTP_GET, serviceType)
+            : endpoints.getServicesEndpoint(HTTP_GET)),
         callback);
 };
 
@@ -343,7 +342,7 @@ Bridge.prototype.listServices = function(serviceType, callback){
  * List all deployed services.
  * @param {bridgeApiCallback=} callback Function to call upon completion.
  */
-Bridge.prototype.listAllServices = function(callback){
+Bridge.prototype.listAllServices = function(callback) {
     let self = this;
     return self.listServices(null, callback);
 };
@@ -352,7 +351,7 @@ Bridge.prototype.listAllServices = function(callback){
  * List deployed xUML services.
  * @param {bridgeApiCallback=} callback Function to call upon completion.
  */
-Bridge.prototype.listXUMLServices = function(callback){
+Bridge.prototype.listXUMLServices = function(callback) {
     let self = this;
     return self.listServices(XUML_SERVICE_TYPE, callback);
 };
@@ -361,7 +360,7 @@ Bridge.prototype.listXUMLServices = function(callback){
  * List deployed Node.js services.
  * @param {bridgeApiCallback=} callback Function to call upon completion.
  */
-Bridge.prototype.listNodeServices = function(callback){
+Bridge.prototype.listNodeServices = function(callback) {
     let self = this;
     return self.listServices(NODE_SERVICE_TYPE, callback);
 };
@@ -370,7 +369,7 @@ Bridge.prototype.listNodeServices = function(callback){
  * List deployed java services.
  * @param {bridgeApiCallback=} callback Function to call upon completion.
  */
-Bridge.prototype.listJavaServices = function(callback){
+Bridge.prototype.listJavaServices = function(callback) {
     let self = this;
     return self.listServices(JAVA_SERVICE_TYPE, callback);
 };
@@ -382,7 +381,7 @@ Bridge.prototype.listJavaServices = function(callback){
  * @param {!string} serviceType 'xUML', 'node', or 'java'
  * @param {bridgeApiNoResponseCallback=} callback Function to call upon completion.
  */
-Bridge.prototype.setServiceStatus = function(status, name, serviceType, callback){
+Bridge.prototype.setServiceStatus = function(status, name, serviceType, callback) {
     let self = this;
 
     _executeRequest(
@@ -398,7 +397,7 @@ Bridge.prototype.setServiceStatus = function(status, name, serviceType, callback
  * @param {!string} name Name of the service.
  * @param {bridgeApiNoResponseCallback=} callback Function to call upon completion.
  */
-Bridge.prototype.startXUMLService = function( name, callback) {
+Bridge.prototype.startXUMLService = function(name, callback) {
     this.setServiceStatus("start", name, XUML_SERVICE_TYPE, callback);
 };
 
@@ -408,7 +407,7 @@ Bridge.prototype.startXUMLService = function( name, callback) {
  * @param {!string} name Name of the service.
  * @param {bridgeApiNoResponseCallback=} callback Function to call upon completion.
  */
-Bridge.prototype.stopXUMLService = function( name, callback) {
+Bridge.prototype.stopXUMLService = function(name, callback) {
     this.setServiceStatus("stop", name, XUML_SERVICE_TYPE, callback);
 };
 
@@ -418,7 +417,7 @@ Bridge.prototype.stopXUMLService = function( name, callback) {
  * @param {!string} name Name of the service.
  * @param {bridgeApiNoResponseCallback=} callback Function to call upon completion.
  */
-Bridge.prototype.killXUMLService = function( name, callback) {
+Bridge.prototype.killXUMLService = function(name, callback) {
     this.setServiceStatus("kill", name, XUML_SERVICE_TYPE, callback);
 };
 
@@ -428,7 +427,7 @@ Bridge.prototype.killXUMLService = function( name, callback) {
  * @param {!string} name Name of the service.
  * @param {bridgeApiNoResponseCallback=} callback Function to call upon completion.
  */
-Bridge.prototype.startNodeService = function( name, callback) {
+Bridge.prototype.startNodeService = function(name, callback) {
     this.setServiceStatus("start", name, NODE_SERVICE_TYPE, callback);
 };
 
@@ -438,7 +437,7 @@ Bridge.prototype.startNodeService = function( name, callback) {
  * @param {!string} name Name of the service.
  * @param {bridgeApiNoResponseCallback=} callback Function to call upon completion.
  */
-Bridge.prototype.stopNodeService = function( name, callback) {
+Bridge.prototype.stopNodeService = function(name, callback) {
     this.setServiceStatus("stop", name, NODE_SERVICE_TYPE, callback);
 };
 
@@ -448,7 +447,7 @@ Bridge.prototype.stopNodeService = function( name, callback) {
  * @param {!string} name Name of the service.
  * @param {bridgeApiNoResponseCallback=} callback Function to call upon completion.
  */
-Bridge.prototype.startJavaService = function( name, callback) {
+Bridge.prototype.startJavaService = function(name, callback) {
     this.setServiceStatus("start", name, JAVA_SERVICE_TYPE, callback);
 };
 
@@ -458,7 +457,7 @@ Bridge.prototype.startJavaService = function( name, callback) {
  * @param {!string} name Name of the service.
  * @param {bridgeApiNoResponseCallback=} callback Function to call upon completion.
  */
-Bridge.prototype.stopJavaService = function( name, callback) {
+Bridge.prototype.stopJavaService = function(name, callback) {
     this.setServiceStatus("stop", name, JAVA_SERVICE_TYPE, callback);
 };
 
@@ -468,7 +467,7 @@ Bridge.prototype.stopJavaService = function( name, callback) {
  * @param {!string} serviceType 'xUML', 'node', or 'java'
  * @param {bridgeApiCallback=} callback Function to call upon completion.
  */
-Bridge.prototype.getServiceStatus = function(name, serviceType, callback){
+Bridge.prototype.getServiceStatus = function(name, serviceType, callback) {
     let self = this;
 
     _executeRequest(
@@ -483,7 +482,7 @@ Bridge.prototype.getServiceStatus = function(name, serviceType, callback){
  * @param {!string} name Name of the service.
  * @param {bridgeApiCallback=} callback Function to call upon completion.
  */
-Bridge.prototype.getXUMLServiceStatus = function(name, callback){
+Bridge.prototype.getXUMLServiceStatus = function(name, callback) {
     this.getServiceStatus(name, XUML_SERVICE_TYPE, callback);
 };
 
@@ -492,7 +491,7 @@ Bridge.prototype.getXUMLServiceStatus = function(name, callback){
  * @param {!string} name Name of the service.
  * @param {bridgeApiCallback=} callback Function to call upon completion.
  */
-Bridge.prototype.getNodeServiceStatus = function(name, callback){
+Bridge.prototype.getNodeServiceStatus = function(name, callback) {
     this.getServiceStatus(name, NODE_SERVICE_TYPE, callback);
 };
 
@@ -501,7 +500,7 @@ Bridge.prototype.getNodeServiceStatus = function(name, callback){
  * @param {!string} name Name of the service.
  * @param {bridgeApiCallback=} callback Function to call upon completion.
  */
-Bridge.prototype.getJavaServiceStatus = function(name, callback){
+Bridge.prototype.getJavaServiceStatus = function(name, callback) {
     this.getServiceStatus(name, JAVA_SERVICE_TYPE, callback);
 };
 
@@ -510,7 +509,7 @@ Bridge.prototype.getJavaServiceStatus = function(name, callback){
  * @param {!string} name Name of the service.
  * @param {bridgeApiCallback=} callback Function to call upon completion.
  */
-Bridge.prototype.getXUMLServiceInfo = function(name, callback){
+Bridge.prototype.getXUMLServiceInfo = function(name, callback) {
     let self = this;
 
     _executeRequest(
@@ -525,7 +524,7 @@ Bridge.prototype.getXUMLServiceInfo = function(name, callback){
  * @param {!string} name Name of the service.
  * @param {bridgeApiCallback=} callback Function to call upon completion.
  */
-Bridge.prototype.getXUMLModelNotesList = function(name, callback){
+Bridge.prototype.getXUMLModelNotesList = function(name, callback) {
     let self = this;
 
     _executeRequest(
@@ -541,7 +540,7 @@ Bridge.prototype.getXUMLModelNotesList = function(name, callback){
  * @param {!string} notesFilename Name of the notes file to fetch.
  * @param {bridgeApiCallback=} callback Function to call upon completion.
  */
-Bridge.prototype.getXUMLModelNotes = function(name, notesFilename, callback){
+Bridge.prototype.getXUMLModelNotes = function(name, notesFilename, callback) {
     let self = this;
 
     _executeRequest(
@@ -556,7 +555,7 @@ Bridge.prototype.getXUMLModelNotes = function(name, notesFilename, callback){
  * @param {!string} name Name of the service.
  * @param {bridgeApiCallback=} callback Function to call upon completion.
  */
-Bridge.prototype.getXUMLCustomNotes = function(name, callback){
+Bridge.prototype.getXUMLCustomNotes = function(name, callback) {
     let self = this;
 
     _executeRequest(
@@ -572,7 +571,7 @@ Bridge.prototype.getXUMLCustomNotes = function(name, callback){
  * @param {!string|!Buffer|!ReadStream} content The new content of the custom model notes.
  * @param {bridgeApiNoResponseCallback=} callback Function to call upon completion.
  */
-Bridge.prototype.setXUMLCustomNotes = function(name, content, callback){
+Bridge.prototype.setXUMLCustomNotes = function(name, content, callback) {
     let self = this;
 
     const requestObject = self._composeRequestObject(
@@ -591,15 +590,15 @@ Bridge.prototype.setXUMLCustomNotes = function(name, content, callback){
  * @param {!string} name Name of the service.
  * @param {bridgeApiCallback=} callback Function to call upon completion.
  */
-Bridge.prototype.getXUMLServiceRepository = function(name, callback){
+Bridge.prototype.getXUMLServiceRepository = function(name, callback) {
     let self = this;
 
     _executeRequest(
         self._composeDownloadRequest(
             endpoints.getServiceEndpoint(
                 HTTP_GET, XUML_SERVICE_TYPE, name, 'repository'),
-                true
-            ),
+            true
+        ),
         callback);
 };
 
@@ -609,7 +608,7 @@ Bridge.prototype.getXUMLServiceRepository = function(name, callback){
  * @param {!string} serviceType 'xUML', 'node', or 'java'
  * @param {bridgeApiNoResponseCallback=} callback Function to call upon completion.
  */
-Bridge.prototype.removeService = function(name, serviceType, callback){
+Bridge.prototype.removeService = function(name, serviceType, callback) {
     let self = this;
 
     _executeRequest(
@@ -625,7 +624,7 @@ Bridge.prototype.removeService = function(name, serviceType, callback){
  * @param {!string} name Name of the service.
  * @param {bridgeApiNoResponseCallback=} callback Function to call upon completion.
  */
-Bridge.prototype.removeXUMLService = function( name, callback) {
+Bridge.prototype.removeXUMLService = function(name, callback) {
     this.removeService(name, XUML_SERVICE_TYPE, callback);
 };
 
@@ -635,7 +634,7 @@ Bridge.prototype.removeXUMLService = function( name, callback) {
  * @param {!string} name Name of the service.
  * @param {bridgeApiNoResponseCallback=} callback Function to call upon completion.
  */
-Bridge.prototype.removeNodeService = function( name, callback) {
+Bridge.prototype.removeNodeService = function(name, callback) {
     this.removeService(name, NODE_SERVICE_TYPE, callback);
 };
 
@@ -645,7 +644,7 @@ Bridge.prototype.removeNodeService = function( name, callback) {
  * @param {!string} name Name of the service.
  * @param {bridgeApiNoResponseCallback=} callback Function to call upon completion.
  */
-Bridge.prototype.removeJavaService = function( name, callback) {
+Bridge.prototype.removeJavaService = function(name, callback) {
     this.removeService(name, JAVA_SERVICE_TYPE, callback);
 };
 
@@ -791,10 +790,13 @@ Bridge.prototype.setServicePreferences = function(name, serviceType, preferences
 
         let correct = Object.keys(preferences).every(function(k) {
             if(!currentPreferences.hasOwnProperty(k)) {
-                callback({ errorType: "Usage error", error: {details: "Property '" + k + "' is unknown to the Bridge."}});
+                callback({
+                    errorType: "Usage error",
+                    error: {details: "Property '" + k + "' is unknown to the Bridge."}
+                });
                 return false;
             } else if(typeof currentPreferences[k] !== typeof preferences[k]) {
-                callback({ errorType: "Usage error", error: {details: "Property '" + k + "' has a wrong type."}});
+                callback({errorType: "Usage error", error: {details: "Property '" + k + "' has a wrong type."}});
                 return false;
             }
             return true;
@@ -876,11 +878,11 @@ Bridge.prototype.setServiceSettings = function(name, serviceType, settings, call
         let newSettings = {setting: []};
         let correct = Object.keys(settings).every(function(k) {
             let referenceSetting = currentSettings.setting.find(x => x.id === k);
-            if (!referenceSetting) {
-                callback({ errorType: "Usage error", error: {details: "Setting '" + k + "' is unknown to the Bridge."}});
+            if(!referenceSetting) {
+                callback({errorType: "Usage error", error: {details: "Setting '" + k + "' is unknown to the Bridge."}});
                 return false;
             }
-            newSettings.setting.push({"id": k, "currentValue": settings[k] });
+            newSettings.setting.push({"id": k, "currentValue": settings[k]});
             return true;
         });
 
@@ -1018,7 +1020,7 @@ Bridge.prototype.uploadXUMLResources = function(type, content, filename, callbac
             }
         };
     } else {
-        requestObject.formData = { uploadFile: content };
+        requestObject.formData = {uploadFile: content};
     }
 
     _executeRequest(requestObject, callback);
@@ -1162,7 +1164,6 @@ Bridge.prototype.listXUMLVariables = function(callback) {
             endpoints.getXUMLEndpoint(HTTP_GET, 'variables')),
         callback);
 };
-
 
 /** Exports **/
 module.exports = Bridge;

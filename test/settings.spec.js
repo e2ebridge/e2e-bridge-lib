@@ -5,12 +5,12 @@ function makeChangedSettings(settings, changes) {
     // this will crash beautifully if setting not found. It's OK in test.
     const result = JSON.parse(JSON.stringify(settings)); // deep copy
     Object.keys(changes).forEach(c => {
-        result.find( s => s.id === c ).currentValue = '' + changes[c]
+        result.find(s => s.id === c).currentValue = '' + changes[c]
     });
     return result;
 }
 
-describe( "Settings module", function() {
+describe("Settings module", function() {
     let scope;
     const serviceUriPath = `/bridge/rest/services/xuml/${helper.xUmlServiceInstance}`;
     const serviceUri = `${helper.base}/${serviceUriPath}`;
@@ -58,16 +58,16 @@ describe( "Settings module", function() {
         nock.cleanAll();
     });
 
-    it("can query", function(done){
+    it("can query", function(done) {
 
         helper.skipIntegration();
 
         scope.get(`${serviceUriPath}/settings`)
-             .reply(200, {
-                 "service": helper.xUmlServiceInstance,
-                 "link": links,
-                 "setting": settings
-             });
+            .reply(200, {
+                "service": helper.xUmlServiceInstance,
+                "link": links,
+                "setting": settings
+            });
 
         helper.makeBridgeInstance().getXUMLServiceSettings(helper.xUmlServiceInstance, function(err, res) {
             expect(err).toBeFalsy();
@@ -79,7 +79,7 @@ describe( "Settings module", function() {
         });
     });
 
-    it("can change string value", function(done){
+    it("can change string value", function(done) {
 
         helper.skipIntegration();
 
@@ -87,21 +87,21 @@ describe( "Settings module", function() {
         const settingsAfter = makeChangedSettings(settings, changes);
 
         scope.get(`${serviceUriPath}/settings`)
-             .reply(200, {
-                 "service": helper.xUmlServiceInstance,
-                 "link": links,
-                 "setting": settings
-             });
+            .reply(200, {
+                "service": helper.xUmlServiceInstance,
+                "link": links,
+                "setting": settings
+            });
 
-        scope.put(`${serviceUriPath}/settings`, { "setting": [ { "id": "StringTestValue", "currentValue": "new value" } ] } )
-             .reply(200, undefined);
+        scope.put(`${serviceUriPath}/settings`, {"setting": [{"id": "StringTestValue", "currentValue": "new value"}]})
+            .reply(200, undefined);
 
         scope.get(`${serviceUriPath}/settings`)
-             .reply(200, {
-                 "service": helper.xUmlServiceInstance,
-                 "link": links,
-                 "setting": settingsAfter
-             });
+            .reply(200, {
+                "service": helper.xUmlServiceInstance,
+                "link": links,
+                "setting": settingsAfter
+            });
 
         helper.makeBridgeInstance().setXUMLServiceSettings(helper.xUmlServiceInstance,
             changes,
@@ -116,7 +116,7 @@ describe( "Settings module", function() {
         );
     });
 
-    it("can change boolean value", function(done){
+    it("can change boolean value", function(done) {
 
         helper.skipIntegration();
 
@@ -130,7 +130,7 @@ describe( "Settings module", function() {
                 "setting": settings
             });
 
-        scope.put(`${serviceUriPath}/settings`, { "setting": [ { "id": "BooleanTestValue", "currentValue": "false" } ] } )
+        scope.put(`${serviceUriPath}/settings`, {"setting": [{"id": "BooleanTestValue", "currentValue": "false"}]})
             .reply(200, undefined);
 
         scope.get(`${serviceUriPath}/settings`)
@@ -153,7 +153,7 @@ describe( "Settings module", function() {
         );
     });
 
-    it("can change integer value", function(done){
+    it("can change integer value", function(done) {
 
         helper.skipIntegration();
 
@@ -167,7 +167,7 @@ describe( "Settings module", function() {
                 "setting": settings
             });
 
-        scope.put(`${serviceUriPath}/settings`, { "setting": [ { "id": "IntegerTestValue", "currentValue": "42" } ] } )
+        scope.put(`${serviceUriPath}/settings`, {"setting": [{"id": "IntegerTestValue", "currentValue": "42"}]})
             .reply(200, undefined);
 
         scope.get(`${serviceUriPath}/settings`)
@@ -190,7 +190,7 @@ describe( "Settings module", function() {
         );
     });
 
-    it("can change multiple values", function(done){
+    it("can change multiple values", function(done) {
 
         helper.skipIntegration();
 
@@ -210,11 +210,11 @@ describe( "Settings module", function() {
 
         scope.put(`${serviceUriPath}/settings`, {
             "setting": [
-                { "id": "BooleanTestValue", "currentValue": "false" },
-                { "id": "IntegerTestValue", "currentValue": "128" },
-                { "id": "StringTestValue", "currentValue": "gugus" }
+                {"id": "BooleanTestValue", "currentValue": "false"},
+                {"id": "IntegerTestValue", "currentValue": "128"},
+                {"id": "StringTestValue", "currentValue": "gugus"}
             ]
-        } )
+        })
             .reply(200, undefined);
 
         scope.get(`${serviceUriPath}/settings`)

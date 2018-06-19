@@ -9,7 +9,7 @@ function makeChangedPreferences(preferences, changes) {
     return result;
 }
 
-describe( "Preferences module", function() {
+describe("Preferences module", function() {
     let scope;
     const serviceUriPath = `/bridge/rest/services/xuml/${helper.xUmlServiceInstance}`;
     const serviceUri = `${helper.base}/${serviceUriPath}`;
@@ -64,10 +64,10 @@ describe( "Preferences module", function() {
         nock.cleanAll();
     });
 
-    it("can query", function(done){
+    it("can query", function(done) {
 
         scope.get(`${serviceUriPath}/preferences`)
-             .reply(200, makeResponseObject(preferences));
+            .reply(200, makeResponseObject(preferences));
 
         helper.makeBridgeInstance().getXUMLServicePreferences(helper.xUmlServiceInstance, function(err, res) {
             expect(err).toBeFalsy();
@@ -79,16 +79,16 @@ describe( "Preferences module", function() {
         });
     });
 
-    it("can change string value", function(done){
+    it("can change string value", function(done) {
 
         const changes = {"bridgeServerLogLevel": "Debug"};
         const preferencesAfter = makeChangedPreferences(preferences, changes);
 
         scope.get(`${serviceUriPath}/preferences`)
-             .reply(200, makeResponseObject(preferences));
+            .reply(200, makeResponseObject(preferences));
 
         scope.put(`${serviceUriPath}/preferences`, preferencesAfter)
-             .reply(200, undefined);
+            .reply(200, undefined);
 
         helper.makeBridgeInstance().setXUMLServicePreferences(helper.xUmlServiceInstance,
             changes,
@@ -103,7 +103,7 @@ describe( "Preferences module", function() {
         );
     });
 
-    it("can change boolean value", function(done){
+    it("can change boolean value", function(done) {
 
         const changes = {"automaticStartup": true};
         const preferencesAfter = makeChangedPreferences(preferences, changes);
@@ -127,7 +127,7 @@ describe( "Preferences module", function() {
         );
     });
 
-    it("can change multiple values", function(done){
+    it("can change multiple values", function(done) {
 
         const changes = {
             "automaticRestart": true,

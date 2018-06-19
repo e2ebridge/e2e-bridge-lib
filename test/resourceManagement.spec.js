@@ -1,8 +1,9 @@
 let helper = require('./helper');
 let nock = require('nock');
 
-describe( "Resources", function() {
+describe("Resources", function() {
     let scope;
+
     function resourceUriPath(resourceType, tail) {
         return `/bridge/rest/xuml/${resourceType}${tail}`;
     }
@@ -28,13 +29,13 @@ describe( "Resources", function() {
             /\r\n$/
         ].map(r => r.source).join(''));
 
-        describe("'resource'", function () {
+        describe("'resource'", function() {
 
             function endpoint(tail) {
                 return resourceUriPath('resource', tail);
             }
 
-            it("can be listed", function (done) {
+            it("can be listed", function(done) {
 
                 const response = {
                     "file": [
@@ -56,7 +57,7 @@ describe( "Resources", function() {
                 scope.get(endpoint(''))
                     .reply(200, response);
 
-                helper.makeBridgeInstance().listXUMLResourceResources(function (err, list) {
+                helper.makeBridgeInstance().listXUMLResourceResources(function(err, list) {
                     expect(err).toBeFalsy();
                     expect(Array.isArray(list.file)).toBeTruthy();
                     list.file.forEach(function(f) {
@@ -70,42 +71,42 @@ describe( "Resources", function() {
                 });
             });
 
-            it("can be uploaded", function (done) {
+            it("can be uploaded", function(done) {
 
                 helper.skipIntegration();
 
                 scope.post(endpoint(''), uploadBodyRegexp)
                     .reply(200, undefined);
 
-                helper.makeBridgeInstance().uploadXUMLResourceResources('Gugus!', 'gugus.txt', function (err) {
+                helper.makeBridgeInstance().uploadXUMLResourceResources('Gugus!', 'gugus.txt', function(err) {
                     expect(err).toBeFalsy();
                     scope.done();
                     done();
                 });
             });
 
-            it("can be deleted", function (done) {
+            it("can be deleted", function(done) {
 
                 helper.skipIntegration();
 
                 scope.delete(endpoint('/gugus.txt'))
                     .reply(200, undefined);
 
-                helper.makeBridgeInstance().deleteXUMLResourceResources('gugus.txt', function (err) {
+                helper.makeBridgeInstance().deleteXUMLResourceResources('gugus.txt', function(err) {
                     expect(err).toBeFalsy();
                     scope.done();
                     done();
                 });
             });
 
-            it("can be downloaded", function (done) {
+            it("can be downloaded", function(done) {
 
                 helper.skipIntegration();
 
                 scope.get(endpoint('/gugus.txt'))
                     .reply(200, 'Gugus!'); // the real API gives us zip file!
 
-                helper.makeBridgeInstance().getXUMLResourceResources('gugus.txt', function (err, res) {
+                helper.makeBridgeInstance().getXUMLResourceResources('gugus.txt', function(err, res) {
                     expect(err).toBeFalsy();
                     expect(Buffer.isBuffer(res)).toBeTruthy();
                     expect(res.toString()).toEqual('Gugus!');
@@ -115,13 +116,13 @@ describe( "Resources", function() {
             });
         });
 
-        describe("'java'", function () {
+        describe("'java'", function() {
 
             function endpoint(tail) {
                 return resourceUriPath('java', tail);
             }
 
-            it("can be listed", function (done) {
+            it("can be listed", function(done) {
 
                 const response = {
                     "file": [
@@ -143,7 +144,7 @@ describe( "Resources", function() {
                 scope.get(endpoint(''))
                     .reply(200, response);
 
-                helper.makeBridgeInstance().listXUMLJavaResources(function (err, list) {
+                helper.makeBridgeInstance().listXUMLJavaResources(function(err, list) {
                     expect(err).toBeFalsy();
                     expect(Array.isArray(list.file)).toBeTruthy();
                     list.file.forEach(function(f) {
@@ -157,42 +158,42 @@ describe( "Resources", function() {
                 });
             });
 
-            it("can be uploaded", function (done) {
+            it("can be uploaded", function(done) {
 
                 helper.skipIntegration();
 
                 scope.post(endpoint(''), uploadBodyRegexp)
                     .reply(200, undefined);
 
-                helper.makeBridgeInstance().uploadXUMLJavaResources('Gugus!', 'gugus.txt', function (err) {
+                helper.makeBridgeInstance().uploadXUMLJavaResources('Gugus!', 'gugus.txt', function(err) {
                     expect(err).toBeFalsy();
                     scope.done();
                     done();
                 });
             });
 
-            it("can be deleted", function (done) {
+            it("can be deleted", function(done) {
 
                 helper.skipIntegration();
 
                 scope.delete(endpoint('/gugus.txt'))
                     .reply(200, undefined);
 
-                helper.makeBridgeInstance().deleteXUMLJavaResources('gugus.txt', function (err) {
+                helper.makeBridgeInstance().deleteXUMLJavaResources('gugus.txt', function(err) {
                     expect(err).toBeFalsy();
                     scope.done();
                     done();
                 });
             });
 
-            it("can be downloaded", function (done) {
+            it("can be downloaded", function(done) {
 
                 helper.skipIntegration();
 
                 scope.get(endpoint('/gugus.txt'))
                     .reply(200, 'Gugus!'); // the real API gives us zip file!
 
-                helper.makeBridgeInstance().getXUMLJavaResources('gugus.txt', function (err, res) {
+                helper.makeBridgeInstance().getXUMLJavaResources('gugus.txt', function(err, res) {
                     expect(err).toBeFalsy();
                     expect(Buffer.isBuffer(res)).toBeTruthy();
                     expect(res.toString()).toEqual('Gugus!');
@@ -202,13 +203,13 @@ describe( "Resources", function() {
             });
         });
 
-        describe("'xslt'", function () {
+        describe("'xslt'", function() {
 
             function endpoint(tail) {
                 return resourceUriPath('xslt', tail);
             }
 
-            it("can be listed", function (done) {
+            it("can be listed", function(done) {
 
                 const response = {
                     "file": [
@@ -224,7 +225,7 @@ describe( "Resources", function() {
                 scope.get(endpoint(''))
                     .reply(200, response);
 
-                helper.makeBridgeInstance().listXUMLXsltResources(function (err, list) {
+                helper.makeBridgeInstance().listXUMLXsltResources(function(err, list) {
                     expect(err).toBeFalsy();
                     expect(Array.isArray(list.file)).toBeTruthy();
                     list.file.forEach(function(f) {
@@ -238,42 +239,42 @@ describe( "Resources", function() {
                 });
             });
 
-            it("can be uploaded", function (done) {
+            it("can be uploaded", function(done) {
 
                 helper.skipIntegration();
 
                 scope.post(endpoint(''), uploadBodyRegexp)
                     .reply(200, undefined);
 
-                helper.makeBridgeInstance().uploadXUMLXsltResources('Gugus!', 'gugus.txt', function (err) {
+                helper.makeBridgeInstance().uploadXUMLXsltResources('Gugus!', 'gugus.txt', function(err) {
                     expect(err).toBeFalsy();
                     scope.done();
                     done();
                 });
             });
 
-            it("can be deleted", function (done) {
+            it("can be deleted", function(done) {
 
                 helper.skipIntegration();
 
                 scope.delete(endpoint('/gugus.txt'))
                     .reply(200, undefined);
 
-                helper.makeBridgeInstance().deleteXUMLXsltResources('gugus.txt', function (err) {
+                helper.makeBridgeInstance().deleteXUMLXsltResources('gugus.txt', function(err) {
                     expect(err).toBeFalsy();
                     scope.done();
                     done();
                 });
             });
 
-            it("can be downloaded", function (done) {
+            it("can be downloaded", function(done) {
 
                 helper.skipIntegration();
 
                 scope.get(endpoint('/gugus.txt'))
                     .reply(200, 'Gugus!'); // the real API gives us zip file!
 
-                helper.makeBridgeInstance().getXUMLXsltResources('gugus.txt', function (err, res) {
+                helper.makeBridgeInstance().getXUMLXsltResources('gugus.txt', function(err, res) {
                     expect(err).toBeFalsy();
                     expect(Buffer.isBuffer(res)).toBeTruthy();
                     expect(res.toString()).toEqual('Gugus!');

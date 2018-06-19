@@ -1,8 +1,9 @@
 let helper = require('./helper');
 let nock = require('nock');
 
-describe( "Custom notes", function() {
+describe("Custom notes", function() {
     let scope;
+
     function endpoint(tail) {
         return `/bridge/rest/services/xuml/${helper.xUmlServiceInstance}${tail}`;
     }
@@ -22,7 +23,7 @@ describe( "Custom notes", function() {
         scope.put(endpoint('/customnotes'), referenceNotes)
             .reply(200, undefined);
 
-        helper.makeBridgeInstance().setXUMLCustomNotes(helper.xUmlServiceInstance, referenceNotes, function (err) {
+        helper.makeBridgeInstance().setXUMLCustomNotes(helper.xUmlServiceInstance, referenceNotes, function(err) {
             expect(err).toBeFalsy();
             scope.done();
             done();
@@ -35,7 +36,7 @@ describe( "Custom notes", function() {
         scope.get(endpoint('/customnotes'))
             .reply(200, referenceNotes);
 
-        helper.makeBridgeInstance().getXUMLCustomNotes(helper.xUmlServiceInstance, function (err, notes) {
+        helper.makeBridgeInstance().getXUMLCustomNotes(helper.xUmlServiceInstance, function(err, notes) {
             expect(err).toBeFalsy();
             expect(notes).toEqual(referenceNotes);
             scope.done();

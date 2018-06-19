@@ -1,7 +1,7 @@
 let helper = require('./helper');
 let nock = require('nock');
 
-describe( "Variables", function() {
+describe("Variables", function() {
     let scope;
     const endpoint = '/bridge/rest/xuml/variables';
 
@@ -13,7 +13,7 @@ describe( "Variables", function() {
         nock.cleanAll();
     });
 
-    it("can be listed", function (done) {
+    it("can be listed", function(done) {
 
         const response = {
             "link": [
@@ -37,7 +37,7 @@ describe( "Variables", function() {
         scope.get(endpoint)
             .reply(200, response);
 
-        helper.makeBridgeInstance().listXUMLVariables(function (err, list) {
+        helper.makeBridgeInstance().listXUMLVariables(function(err, list) {
             expect(err).toBeFalsy();
             expect(Array.isArray(list.variable)).toBeTruthy();
             list.variable.forEach(function(f) {
