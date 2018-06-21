@@ -11,7 +11,6 @@
     "easy-child": "0.0.2",
     "fstream-ignore": "^1.0.5",
     "inherits": "2",
-    "npm": "3.x",
     "package": "^1.0.1",
     "request": "^2.87.0",
     "temp": "^0.8.0",
