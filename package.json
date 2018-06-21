@@ -7,7 +7,7 @@
   },
   "dependencies": {
     "archiver": "^2.1.0",
-    "async": "^0.9.0",
+    "async": "^2.6.1",
     "easy-child": "0.0.2",
     "fstream-ignore": "^1.0.5",
     "inherits": "2",
