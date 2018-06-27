@@ -1184,3 +1184,6 @@ module.exports = Bridge;
 module.exports.pack = pack;
 module.exports.deploymentOptions = deploymentOptions;
 module.exports.defaultDeploymentOptions = defaultDeploymentOptions;
+module.exports.XUML_SERVICE_TYPE = XUML_SERVICE_TYPE;
+module.exports.NODE_SERVICE_TYPE = NODE_SERVICE_TYPE;
+module.exports.JAVA_SERVICE_TYPE = JAVA_SERVICE_TYPE;
