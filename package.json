@@ -11,6 +11,7 @@
     "easy-child": "0.0.2",
     "fstream-ignore": "^1.0.5",
     "inherits": "2",
+    "lodash": "^4.17.10",
     "package": "^1.0.1",
     "request": "^2.87.0",
     "temp": "^0.8.0",

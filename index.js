@@ -10,6 +10,7 @@ const request = require('request');
 const fs = require('fs');
 const path = require('path');
 const tmp = require('tmp');
+const _ = require('lodash');
 
 const repository = require('./lib/repository');
 const endpoints = require('./lib/endpoints');
@@ -860,6 +861,26 @@ Bridge.prototype.setJavaServicePreferences = function(name, preferences, callbac
     self.setServicePreferences(name, JAVA_SERVICE_TYPE, preferences, callback);
 };
 
+function mergeXUMLSettings(changes, currentSettings) {
+    let newSettings = {setting: []};
+    let error = null;
+    Object.keys(changes).every(function(k) {
+        let referenceSetting = currentSettings.setting.find(x => x.id === k);
+        if(!referenceSetting) {
+            error = {errorType: "Usage error", error: {details: "Setting '" + k + "' is unknown to the Bridge."}};
+            return false;
+        }
+        newSettings.setting.push({"id": k, "currentValue": changes[k]});
+        return true;
+    });
+    return {error, newSettings};
+}
+
+function mergeNodeSettings(changes, currentSettings) {
+    return { error:null, newSettings: _.merge({}, currentSettings, changes)};
+}
+
+
 /**
  * Set service settings.
  * @param {!string} name Name of the service.
@@ -871,23 +892,16 @@ Bridge.prototype.setJavaServicePreferences = function(name, preferences, callbac
 Bridge.prototype.setServiceSettings = function(name, serviceType, settings, callback) {
     let self = this;
 
-    let getCallback = function(error, currentSettings) {
+    let getCallback = function(err, currentSettings) {
+        if(err) {
+            return callback(err);
+        }
+
+        const {error, newSettings} = serviceType === XUML_SERVICE_TYPE
+                                     ? mergeXUMLSettings(settings, currentSettings)
+                                     : mergeNodeSettings(settings, currentSettings);
         if(error) {
             return callback(error);
-        }
-        let newSettings = {setting: []};
-        let correct = Object.keys(settings).every(function(k) {
-            let referenceSetting = currentSettings.setting.find(x => x.id === k);
-            if(!referenceSetting) {
-                callback({errorType: "Usage error", error: {details: "Setting '" + k + "' is unknown to the Bridge."}});
-                return false;
-            }
-            newSettings.setting.push({"id": k, "currentValue": settings[k]});
-            return true;
-        });
-
-        if(!correct) {
-            return;
         }
 
         _executeRequest(
