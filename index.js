@@ -1179,9 +1179,22 @@ Bridge.prototype.listXUMLVariables = function(callback) {
         callback);
 };
 
+/**
+ * Factory function for the Bridge instances
+ * @param {string} host
+ * @param {integer} port
+ * @param {?string} user
+ * @param {?string} password
+ * @constructs Bridge
+ */
+function createInstance(host, port, user, password) {
+    return new Bridge(host, port, user, password);
+}
+
 /** Exports **/
 module.exports = Bridge;
 module.exports.pack = pack;
+module.exports.createInstance = createInstance;
 module.exports.deploymentOptions = deploymentOptions;
 module.exports.defaultDeploymentOptions = defaultDeploymentOptions;
 module.exports.XUML_SERVICE_TYPE = XUML_SERVICE_TYPE;
