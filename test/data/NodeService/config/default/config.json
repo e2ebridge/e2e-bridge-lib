@@ -1,0 +1,18 @@
+{
+  "aString": "default value",
+  "aNumber": 1234,
+  "anArray": [
+    "jeden",
+    "dwa",
+    "trzy"
+  ],
+  "anObject": {
+    "aString": "default value",
+    "aNumber": 1234,
+    "anArray": [
+      "jeden",
+      "dwa",
+      "trzy"
+    ]
+  }
+}

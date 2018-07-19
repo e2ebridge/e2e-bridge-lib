@@ -3,7 +3,13 @@
   "version": "1.4.0",
   "scripts": {
     "test": "cross-env node $NODE_DEBUG_OPTION ./node_modules/jasmine-xml-reporter/bin/jasmine.js",
-    "test:integration": "cross-env NOCK_OFF=true node $NODE_DEBUG_OPTION ./node_modules/jasmine-xml-reporter/bin/jasmine.js"
+    "test:integration": "cross-env NOCK_OFF=true node $NODE_DEBUG_OPTION ./node_modules/jasmine-xml-reporter/bin/jasmine.js",
+    "test:with-coverage": "nyc --reporter=text-summary ./node_modules/jasmine-xml-reporter/bin/jasmine.js",
+    "test:integration-with-coverage": "cross-env NOCK_OFF=true nyc --reporter=text-summary ./node_modules/jasmine-xml-reporter/bin/jasmine.js",
+    "coverage:html": "nyc report --reporter=html",
+    "coverage:cobertura": "nyc report --reporter=cobertura",
+    "coverage:summary": "nyc report --reporter=text-summary",
+    "coverage:text": "nyc report --reporter=text"
   },
   "dependencies": {
     "archiver": "^2.1.0",
@@ -22,7 +28,9 @@
     "cross-env": "^5.1.5",
     "jasmine": "^3.1.0",
     "jasmine-xml-reporter": "^1.2.1",
-    "nock": "^9.1.6"
+    "nock": "^9.1.6",
+    "nyc": "^12.0.2",
+    "stream-buffers": "^3.0.2"
   },
   "author": {
     "name": "Scheer E2E AG",

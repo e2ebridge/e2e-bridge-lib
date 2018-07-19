@@ -315,7 +315,16 @@ Bridge.prototype.deployService = function(file, options, callback) {
 
                 });
             } else {
-                requestObject.formData = {uploadFile: fs.createReadStream(file)};
+                requestObject.formData = {
+                    uploadFile: {
+                        value: fs.createReadStream(file),
+                        options: {}
+                    }};
+                if(path.extname(file) === ".rep") {
+                    // The '.rep' extension resolves to some MIME type from a vnd tree,
+                    // so we overwrite it here. Not strictly required but avoids confusion.
+                    requestObject.formData.uploadFile.options['contentType'] = 'application/zip';
+                }
                 _executeRequest(requestObject, callback);
             }
         });
@@ -764,16 +773,6 @@ Bridge.prototype.getNodeServiceSettings = function(name, callback) {
 };
 
 /**
- * Get currently active preferences of the given Java service.
- * @param {!string} name Name of the service.
- * @param {bridgeApiCallback=} callback Function to call upon completion.
- */
-Bridge.prototype.getJavaServiceSettings = function(name, callback) {
-    let self = this;
-    self.getServiceSettings(name, JAVA_SERVICE_TYPE, callback);
-};
-
-/**
  * Set service preferences.
  * @param {!string} name Name of the service.
  * @param {!string} serviceType valid service type: 'xUML', 'node'...
@@ -949,17 +948,6 @@ Bridge.prototype.setXUMLServiceSettings = function(name, settings, callback) {
 Bridge.prototype.setNodeServiceSettings = function(name, settings, callback) {
     let self = this;
     self.setServiceSettings(name, NODE_SERVICE_TYPE, settings, callback);
-};
-
-/**
- * Set Java service settings.
- * @param {!string} name Name of the service.
- * @param {!Object} settings Hash of the service settings. For possible keys refer to Bridge API documentation.
- * @param {bridgeApiCallback=} callback Function to call upon completion.
- */
-Bridge.prototype.setJavaServiceSettings = function(name, settings, callback) {
-    let self = this;
-    self.setServiceSettings(name, JAVA_SERVICE_TYPE, settings, callback);
 };
 
 /**

@@ -39,8 +39,8 @@ describe("Variables", function() {
 
         helper.makeBridgeInstance().listXUMLVariables(function(err, list) {
             expect(err).toBeFalsy();
-            expect(Array.isArray(list.variable)).toBeTruthy();
-            list.variable.forEach(function(f) {
+            expect(Array.isArray(list['variable'])).toBeTruthy();
+            list['variable'].forEach(function(f) {
                 expect(f.name).toBeDefined();
                 expect(f.value).toBeDefined();
             });
