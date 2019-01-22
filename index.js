@@ -51,6 +51,7 @@ const HTTP_PUT = 'PUT';
  * @property {?boolean} runScripts
  * @property {?string} instanceName
  * @property {?boolean} preserveNodeModules
+ * @property {?number} stopTimeout @since BridgeAPI 2.9.0
  */
 
 const deploymentOptions = Object.freeze({
@@ -61,6 +62,7 @@ const deploymentOptions = Object.freeze({
     NPM_INSTALL: "npmInstall",
     INSTANCE_NAME: "instanceName",
     PRESERVE_NODE_MODULES: "preserveNodeModules",
+    STOP_TIMEOUT: "stopTimeout", /// @since BridgeAPI 2.9.0
 });
 
 /** @type !Readonly<DeploymentOptions> */
@@ -72,6 +74,22 @@ const defaultDeploymentOptions = Object.freeze({
     [deploymentOptions.NPM_SCRIPTS]: false,
     [deploymentOptions.INSTANCE_NAME]: undefined,
     [deploymentOptions.PRESERVE_NODE_MODULES]: false,
+    [deploymentOptions.STOP_TIMEOUT]: undefined,
+});
+
+/**
+ * @typedef {Object} StopOptions
+ * @since BridgeAPI 2.9.0
+ * @property {?number} stopTimeout
+ */
+
+const stopOptions = Object.freeze({
+    STOP_TIMEOUT: "stopTimeout",
+});
+
+/** @type !Readonly<StopOptions> */
+const defaultStopOptions = Object.freeze({
+    [stopOptions.STOP_TIMEOUT]: undefined,
 });
 
 /**
@@ -389,15 +407,27 @@ Bridge.prototype.listJavaServices = function(callback) {
  * @param {!string} status 'start', 'stop' or 'kill'. Note, that 'kill' will not work for node.js services
  * @param {!string} name Name of the service.
  * @param {!string} serviceType 'xUML', 'node', or 'java'
+ * @param {(StopOptions|bridgeApiNoResponseCallback)=} options Additional options or the callback.
  * @param {bridgeApiNoResponseCallback=} callback Function to call upon completion.
  */
-Bridge.prototype.setServiceStatus = function(status, name, serviceType, callback) {
+Bridge.prototype.setServiceStatus = function(status, name, serviceType, options, callback) {
     let self = this;
+
+    if(!options) {
+        options = {};
+    }
+
+    if(typeof options === 'function') {
+        callback = options;
+        options = {};
+    }
 
     _executeRequest(
         self._composeRequestObject(
             HTTP_PUT,
-            endpoints.getServiceEndpoint(HTTP_PUT, serviceType, name, status)),
+            endpoints.getServiceEndpoint(HTTP_PUT, serviceType, name, status),
+            undefined,
+            options),
         callback);
 };
 
@@ -415,20 +445,22 @@ Bridge.prototype.startXUMLService = function(name, callback) {
  * Stops xUML service
  *
  * @param {!string} name Name of the service.
+ * @param {(StopOptions|bridgeApiNoResponseCallback)=} options Additional options or the callback.
  * @param {bridgeApiNoResponseCallback=} callback Function to call upon completion.
  */
-Bridge.prototype.stopXUMLService = function(name, callback) {
-    this.setServiceStatus("stop", name, XUML_SERVICE_TYPE, callback);
+Bridge.prototype.stopXUMLService = function(name, options, callback) {
+    this.setServiceStatus("stop", name, XUML_SERVICE_TYPE, options, callback);
 };
 
 /**
  * Kills xUML service
  *
  * @param {!string} name Name of the service.
+ * @param {(StopOptions|bridgeApiNoResponseCallback)=} options Additional options or the callback.
  * @param {bridgeApiNoResponseCallback=} callback Function to call upon completion.
  */
-Bridge.prototype.killXUMLService = function(name, callback) {
-    this.setServiceStatus("kill", name, XUML_SERVICE_TYPE, callback);
+Bridge.prototype.killXUMLService = function(name, options, callback) {
+    this.setServiceStatus("kill", name, XUML_SERVICE_TYPE, options, callback);
 };
 
 /**
@@ -445,10 +477,11 @@ Bridge.prototype.startNodeService = function(name, callback) {
  * Stops Node.js service
  *
  * @param {!string} name Name of the service.
+ * @param {(StopOptions|bridgeApiNoResponseCallback)=} options Additional options or the callback.
  * @param {bridgeApiNoResponseCallback=} callback Function to call upon completion.
  */
-Bridge.prototype.stopNodeService = function(name, callback) {
-    this.setServiceStatus("stop", name, NODE_SERVICE_TYPE, callback);
+Bridge.prototype.stopNodeService = function(name, options, callback) {
+    this.setServiceStatus("stop", name, NODE_SERVICE_TYPE, options, callback);
 };
 
 /**
@@ -465,10 +498,11 @@ Bridge.prototype.startJavaService = function(name, callback) {
  * Stops Java service
  *
  * @param {!string} name Name of the service.
+ * @param {(StopOptions|bridgeApiNoResponseCallback)=} options Additional options or the callback.
  * @param {bridgeApiNoResponseCallback=} callback Function to call upon completion.
  */
-Bridge.prototype.stopJavaService = function(name, callback) {
-    this.setServiceStatus("stop", name, JAVA_SERVICE_TYPE, callback);
+Bridge.prototype.stopJavaService = function(name, options, callback) {
+    this.setServiceStatus("stop", name, JAVA_SERVICE_TYPE, options, callback);
 };
 
 /**
@@ -1184,7 +1218,9 @@ module.exports = Bridge;
 module.exports.pack = pack;
 module.exports.createInstance = createInstance;
 module.exports.deploymentOptions = deploymentOptions;
+module.exports.stopOptions = stopOptions;
 module.exports.defaultDeploymentOptions = defaultDeploymentOptions;
+module.exports.defaultStopOptions = defaultStopOptions;
 module.exports.XUML_SERVICE_TYPE = XUML_SERVICE_TYPE;
 module.exports.NODE_SERVICE_TYPE = NODE_SERVICE_TYPE;
 module.exports.JAVA_SERVICE_TYPE = JAVA_SERVICE_TYPE;
