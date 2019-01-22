@@ -226,7 +226,8 @@ describe('Service status', function() {
             const response = {
                 name: helper.nodeJsServiceInstance,
                 type: 'NodeJs',
-                status: 'Stopped'
+                status: 'Stopped',
+                version: '0.0.1'
             };
 
             scope.get(endpoint(''))
@@ -292,7 +293,8 @@ describe('Service status', function() {
             const response = {
                 name: helper.javaServiceInstance,
                 type: 'Java',
-                status: 'Stopped'
+                status: 'Stopped',
+                version: '0.0.1'
             };
 
             scope.get(endpoint(''))
