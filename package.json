@@ -12,24 +12,24 @@
     "coverage:text": "nyc report --reporter=text"
   },
   "dependencies": {
-    "archiver": "^2.1.0",
+    "archiver": "^3.0.0",
     "async": "^2.6.1",
     "easy-child": "0.0.2",
     "fstream-ignore": "^1.0.5",
     "inherits": "2",
-    "lodash": "^4.17.10",
+    "lodash": "^4.17.11",
     "package": "^1.0.1",
-    "request": "^2.87.0",
-    "temp": "^0.8.0",
+    "request": "^2.88.0",
+    "temp": "^0.9.0",
     "tmp": "^0.0.33",
-    "unzip": "^0.1.9"
+    "unzip": "^0.1.11"
   },
   "devDependencies": {
-    "cross-env": "^5.1.5",
-    "jasmine": "^3.1.0",
+    "cross-env": "^5.2.0",
+    "jasmine": "^3.3.1",
     "jasmine-xml-reporter": "^1.2.1",
-    "nock": "^9.1.6",
-    "nyc": "^12.0.2",
+    "nock": "^10.0.6",
+    "nyc": "^13.1.0",
     "stream-buffers": "^3.0.2"
   },
   "author": {
