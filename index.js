@@ -98,7 +98,7 @@ const defaultStopOptions = Object.freeze({
 /**
  * Bridge object
  * @param {string} host
- * @param {Integer} port
+ * @param {number} port
  * @param {?string} user
  * @param {?string} password
  * @constructor
@@ -1205,9 +1205,93 @@ Bridge.prototype.listXUMLVariables = function(callback) {
 };
 
 /**
+ * List user groups.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
+ */
+Bridge.prototype.listGroups = function(callback) {
+    let self = this;
+
+    _executeRequest(
+        self._composeRequestObject(
+            HTTP_GET,
+            endpoints.getEndpoint(HTTP_GET, 'groups')),
+        callback);
+};
+
+/**
+ * Retrieve user group.
+ * @param {!string} id Group id.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
+ */
+Bridge.prototype.getGroup = function(id, callback) {
+    let self = this;
+
+    _executeRequest(
+        self._composeRequestObject(
+            HTTP_GET,
+            endpoints.getEndpoint(HTTP_GET, 'groups', id)),
+        callback);
+};
+
+/**
+ * Create user group.
+ * @param {!Object} group Group.
+ * @param {!string} group.id Group id.
+ * @param {!string} group.name Group name.
+ * @param {!string} group.role The role this group represents.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
+ */
+Bridge.prototype.createGroup = function(group, callback) {
+    let self = this;
+
+    _executeRequest(
+        self._composeRequestObject(
+            HTTP_POST,
+            endpoints.getEndpoint(HTTP_POST, 'groups', group.id),
+            undefined,
+            { name: group.name, role: group.role }),
+        callback);
+};
+
+/**
+ * Modify user group.
+ * @param {!Object} group Group.
+ * @param {!string} group.id Group id - identifies which group to change.
+ * @param {!string} group.name Group name.
+ * @param {!string} group.role The role this group represents.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
+ */
+Bridge.prototype.modifyGroup = function(group, callback) {
+    let self = this;
+
+    _executeRequest(
+        self._composeRequestObject(
+            HTTP_PUT,
+            endpoints.getEndpoint(HTTP_PUT, 'groups', group.id),
+            undefined,
+            { name: group.name, role: group.role }),
+        callback);
+};
+
+/**
+ * Remove user group.
+ * @param {!string} id Group id - identifies which group to remove.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
+ */
+Bridge.prototype.removeGroup = function(id, callback) {
+    let self = this;
+
+    _executeRequest(
+        self._composeRequestObject(
+            HTTP_DELETE,
+            endpoints.getEndpoint(HTTP_DELETE, 'groups', id)),
+        callback);
+};
+
+/**
  * Factory function for the Bridge instances
  * @param {string} host
- * @param {integer} port
+ * @param {number} port
  * @param {?string} user
  * @param {?string} password
  * @constructs Bridge
