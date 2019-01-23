@@ -52,6 +52,7 @@ const HTTP_PUT = 'PUT';
  * @property {?string} instanceName
  * @property {?boolean} preserveNodeModules
  * @property {?number} stopTimeout @since BridgeAPI 2.9.0
+ * @property {?boolean} allowKill @since BridgeAPI 2.9.0
  */
 
 const deploymentOptions = Object.freeze({
@@ -63,6 +64,7 @@ const deploymentOptions = Object.freeze({
     INSTANCE_NAME: "instanceName",
     PRESERVE_NODE_MODULES: "preserveNodeModules",
     STOP_TIMEOUT: "stopTimeout", /// @since BridgeAPI 2.9.0
+    ALLOW_KILL: "allowKill", /// @since BridgeAPI 2.9.0
 });
 
 /** @type !Readonly<DeploymentOptions> */
@@ -75,6 +77,7 @@ const defaultDeploymentOptions = Object.freeze({
     [deploymentOptions.INSTANCE_NAME]: undefined,
     [deploymentOptions.PRESERVE_NODE_MODULES]: false,
     [deploymentOptions.STOP_TIMEOUT]: undefined,
+    [deploymentOptions.ALLOW_KILL]: false,
 });
 
 /**
