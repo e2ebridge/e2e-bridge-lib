@@ -1289,6 +1289,104 @@ Bridge.prototype.removeGroup = function(id, callback) {
 };
 
 /**
+ * List users.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
+ */
+Bridge.prototype.listUsers = function(callback) {
+    let self = this;
+
+    _executeRequest(
+        self._composeRequestObject(
+            HTTP_GET,
+            endpoints.getEndpoint(HTTP_GET, 'users')),
+        callback);
+};
+
+/**
+ * Retrieve user.
+ * @param {!string} id User id.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
+ */
+Bridge.prototype.getUser = function(id, callback) {
+    let self = this;
+
+    _executeRequest(
+        self._composeRequestObject(
+            HTTP_GET,
+            endpoints.getEndpoint(HTTP_GET, 'users', id)),
+        callback);
+};
+
+/**
+ * Take only those parameters from user that are needed to build the query string
+ * @param {!Object} user input
+ */
+function _userToQueryParameters(user) {
+    let params = {};
+    ['name', 'active', 'group', 'password'].forEach( i => params[i] = user[i]);
+    return params;
+}
+
+/**
+ * Create users.
+ * @param {!Object} user User.
+ * @param {!string} user.id User id.
+ * @param {!string} user.name User name.
+ * @param {boolean} user.active Whether the user is active or not.
+ * @param {!string} user.group The group the user belongs to.
+ * @param {!string} user.password User's password.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
+ */
+Bridge.prototype.createUser = function(user, callback) {
+    let self = this;
+
+    _executeRequest(
+        self._composeRequestObject(
+            HTTP_POST,
+            endpoints.getEndpoint(HTTP_POST, 'users', user.id),
+            undefined,
+            _userToQueryParameters(user)),
+        callback);
+};
+
+/**
+ * Create user.
+ * @param {!Object} user User.
+ * @param {!string} user.id User id - identifies which user to modify.
+ * @param {string} user.name User name.
+ * @param {boolean} user.active Whether the user is active or not.
+ * @param {string} user.group The group the user belongs to.
+ * @param {string} user.password User's password.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
+ */
+Bridge.prototype.modifyUser = function(user, callback) {
+    let self = this;
+
+    _executeRequest(
+        self._composeRequestObject(
+            HTTP_PUT,
+            endpoints.getEndpoint(HTTP_PUT, 'users', user.id),
+            undefined,
+            _userToQueryParameters(user)),
+        callback);
+};
+
+/**
+ * Remove user.
+ * @param {!string} id User id - identifies which user to remove.
+ * @param {bridgeApiCallback=} callback Function to call upon completion.
+ */
+Bridge.prototype.removeUser = function(id, callback) {
+    let self = this;
+
+    _executeRequest(
+        self._composeRequestObject(
+            HTTP_DELETE,
+            endpoints.getEndpoint(HTTP_DELETE, 'users', id)),
+        callback);
+};
+
+/**
  * Factory function for the Bridge instances
  * @param {string} host
  * @param {number} port
