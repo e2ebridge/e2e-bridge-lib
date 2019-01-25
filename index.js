@@ -488,6 +488,17 @@ Bridge.prototype.stopNodeService = function(name, options, callback) {
 };
 
 /**
+ * Kills Node.js service
+ *
+ * @param {!string} name Name of the service.
+ * @param {(StopOptions|bridgeApiNoResponseCallback)=} options Additional options or the callback.
+ * @param {bridgeApiNoResponseCallback=} callback Function to call upon completion.
+ */
+Bridge.prototype.killNodeService = function(name, options, callback) {
+    this.setServiceStatus("kill", name, NODE_SERVICE_TYPE, options, callback);
+};
+
+/**
  * Starts Java service
  *
  * @param {!string} name Name of the service.
@@ -506,6 +517,17 @@ Bridge.prototype.startJavaService = function(name, callback) {
  */
 Bridge.prototype.stopJavaService = function(name, options, callback) {
     this.setServiceStatus("stop", name, JAVA_SERVICE_TYPE, options, callback);
+};
+
+/**
+ * Kills Java service
+ *
+ * @param {!string} name Name of the service.
+ * @param {(StopOptions|bridgeApiNoResponseCallback)=} options Additional options or the callback.
+ * @param {bridgeApiNoResponseCallback=} callback Function to call upon completion.
+ */
+Bridge.prototype.killJavaService = function(name, options, callback) {
+    this.setServiceStatus("kill", name, JAVA_SERVICE_TYPE, options, callback);
 };
 
 /**

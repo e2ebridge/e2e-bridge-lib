@@ -221,6 +221,27 @@ describe('Service status', function() {
                 });
         });
 
+        it('dies', function(done) {
+            scope.put(endpoint('/start'))
+                .reply(200, undefined);
+            scope.put(endpoint('/kill'))
+                .reply(200, undefined);
+
+            helper.makeBridgeInstance().startNodeService(
+                helper.nodeJsServiceInstance,
+                function(err) {
+                    expect(err).toBeFalsy();
+
+                    helper.makeBridgeInstance().killNodeService(
+                        helper.nodeJsServiceInstance,
+                        function(err) {
+                            expect(err).toBeFalsy();
+                            scope.done();
+                            done();
+                        });
+                });
+        });
+
         it('shows status', function(done) {
 
             const response = {
@@ -279,6 +300,27 @@ describe('Service status', function() {
                     expect(err).toBeFalsy();
 
                     helper.makeBridgeInstance().stopJavaService(
+                        helper.javaServiceInstance,
+                        function(err) {
+                            expect(err).toBeFalsy();
+                            scope.done();
+                            done();
+                        });
+                });
+        });
+
+        it('dies', function(done) {
+            scope.put(endpoint('/start'))
+                .reply(200, undefined);
+            scope.put(endpoint('/kill'))
+                .reply(200, undefined);
+
+            helper.makeBridgeInstance().startJavaService(
+                helper.javaServiceInstance,
+                function(err) {
+                    expect(err).toBeFalsy();
+
+                    helper.makeBridgeInstance().killJavaService(
                         helper.javaServiceInstance,
                         function(err) {
                             expect(err).toBeFalsy();
