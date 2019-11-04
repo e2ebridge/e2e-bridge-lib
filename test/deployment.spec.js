@@ -45,10 +45,16 @@ describe("Deployment", function() {
                 return done();
             }
 
-            helper.makeBridgeInstance().removeXUMLService(
-                helper.xUmlServiceInstance,
-                function(err) {
-                    expect(err).toBeFalsy();
+            async.parallel(
+                [
+                    cb => helper
+                        .makeBridgeInstance()
+                        .removeXUMLService(helper.xUmlServiceInstance, cb),
+                    cb => helper
+                        .makeBridgeInstance()
+                        .removeXUMLService(`${helper.xUmlServiceInstance}-second`, cb)
+                ],
+                function() {
                     done();
                 });
         });
@@ -162,7 +168,7 @@ describe("Deployment", function() {
                         .removeNodeService(helper.nodeJsServiceInstance, cb),
                     cb => helper
                         .makeBridgeInstance()
-                        .removeNodeService(helper.nodeJsServiceInstance + '-second', cb)
+                        .removeNodeService(`${helper.nodeJsServiceInstance}-second`, cb)
                 ],
                 function() {
                     done();
