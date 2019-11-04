@@ -872,7 +872,7 @@ Bridge.prototype.setServicePreferences = function(name, serviceType, preferences
                 endpoints.getServiceEndpoint(HTTP_PUT, serviceType, name, 'preferences'),
                 newPreferences),
             function(error, response) {
-                if(!error && !response) {
+                if(!error) {
                     response = newPreferences;
                 }
                 callback(error, response);
@@ -968,14 +968,14 @@ Bridge.prototype.setServiceSettings = function(name, serviceType, settings, call
                 endpoints.getServiceEndpoint(HTTP_PUT, serviceType, name, 'settings'),
                 newSettings),
             function(error, response) {
-                if(!error && !response) {
+                if(!error) {
                     _executeRequest(
                         self._composeRequestObject(
                             HTTP_GET,
                             endpoints.getServiceEndpoint(HTTP_GET, serviceType, name, 'settings')),
                         callback);
                 } else {
-                    callback(error, response);
+                    callback(error);
                 }
             });
     };
