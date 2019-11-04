@@ -123,7 +123,7 @@ describe('Service status', function() {
             const response = {
                 restInfo: [
                     {
-                        ID: 'TickerRESTService:api',
+                        id: 'TickerRESTService:api',
                         active: true,
                         openAPI: '',
                         port: 17700,
@@ -166,7 +166,7 @@ describe('Service status', function() {
                 expect(res['restInfo']).toBeDefined();
                 expect(res['restInfo'].length).toEqual(1);
                 const restPort = res['restInfo'][0];
-                expect(restPort['ID']).toEqual('TickerRESTService:api');
+                expect(restPort['id']).toEqual('TickerRESTService:api');
                 expect(res['soapInfo']).toBeDefined();
                 expect(res['soapInfo'].length).toEqual(3);
                 res['soapInfo'].forEach(i => expect(i['shadowPort']).toEqual(true));
