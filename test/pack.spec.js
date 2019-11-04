@@ -2,7 +2,7 @@ const bridge = require('../index');
 const path = require('path');
 const tmp = require('tmp');
 const fs = require('fs');
-const unzip = require('unzip');
+const unzip = require('unzipper');
 
 describe('Pack', function() {
 

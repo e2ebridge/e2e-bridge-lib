@@ -3,7 +3,7 @@ let nock = require('nock');
 const fs = require('fs');
 const path = require('path');
 const streamBuffers = require('stream-buffers');
-const unzip = require('unzip');
+const unzip = require('unzipper');
 
 describe('Resources', function() {
     let scope;
