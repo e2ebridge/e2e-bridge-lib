@@ -30,7 +30,7 @@ $ npm install e2e-bridge-lib
 
 ``` javascript
 var E2EBridge = require('e2e-bridge-lib');
-var bridgeInstance = new E2EBridge('localhost', 8080, 'admin', 'admin');
+var bridgeInstance = new E2EBridge('https', localhost', 8080, 'admin', 'admin');
 
 bridgeInstance.startXUMLService('PurchaseOrderExample', function(error){
     if(error) {
