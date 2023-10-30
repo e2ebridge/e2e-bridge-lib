@@ -97,13 +97,18 @@ const defaultStopOptions = Object.freeze({
 
 /**
  * Bridge object
+ * @param {string} protocol
  * @param {string} host
  * @param {number} port
  * @param {?string} user
  * @param {?string} password
  * @constructor
  */
-function Bridge(host, port, user, password) {
+function Bridge(protocol, host, port, user, password) {
+    if (protocol && !(protocol === 'http' || protocol === 'https')) {
+        throw new Error(`Unsupported protocol '${protocol}'. Allowed protocols: 'http' or 'https'`);
+    }
+    this._protocol = protocol || 'https';
     this._host = host || 'localhost';
     this._port = port || 8080;
     this._user = user;
@@ -239,7 +244,7 @@ Bridge.prototype._composeRequestObject = function(method, endpoint, content, get
     method = method.toUpperCase();
 
     let ret = {
-        "url": 'https://' + self._host + ':' + self._port + BRIDGE_REST_API_BASE + endpoint,
+        "url": `${self._protocol}://${self._host}:${self._port}${BRIDGE_REST_API_BASE}${endpoint}`,
         "qs": getParams,
         "method": method,
         "strictSSL": false, //because bridge uses self-signed certificate
@@ -1410,14 +1415,15 @@ Bridge.prototype.removeUser = function(id, callback) {
 
 /**
  * Factory function for the Bridge instances
+ * @param {string} protocol
  * @param {string} host
  * @param {number} port
  * @param {?string} user
  * @param {?string} password
  * @constructs Bridge
  */
-function createInstance(host, port, user, password) {
-    return new Bridge(host, port, user, password);
+function createInstance(protocol, host, port, user, password) {
+    return new Bridge(protocol, host, port, user, password);
 }
 
 /** Exports **/
